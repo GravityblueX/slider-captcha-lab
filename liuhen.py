@@ -18,6 +18,10 @@ TOOLS = {
         "script": "authorized_gui_tester.py",
         "desc": "输入授权测试页面 URL 与 selector，运行多种滑动轨迹策略并展示结果。",
     },
+    "风险分析中心": {
+        "script": "risk_gui.py",
+        "desc": "导入浏览器诊断JSON，自动评分环境一致性、事件链和自动化风险，导出HTML报告。",
+    },
     "行为会话测试": {
         "script": "behavior_gui.py",
         "desc": "编排停留、鼠标游走、滚动、点击、输入、等待等完整人类行为会话。",
