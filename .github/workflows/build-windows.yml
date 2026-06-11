@@ -20,9 +20,13 @@ jobs:
           python -m pip install --upgrade pip
           pip install matplotlib pyinstaller
       - name: Build EXE
-        run: pyinstaller --onefile --windowed --name SliderTrajectoryLab gui_app.py
+        run: pyinstaller --onefile --windowed --name SliderTrajectoryLab slider_lab.py
+      - name: Copy demo files
+        run: xcopy /E /I /Y demo dist\demo
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: SliderTrajectoryLab-windows
-          path: dist/SliderTrajectoryLab.exe
+          path: |
+            dist/SliderTrajectoryLab.exe
+            dist/demo/**
