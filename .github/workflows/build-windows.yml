@@ -18,15 +18,20 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install matplotlib pyinstaller
-      - name: Build EXE
-        run: pyinstaller --onefile --windowed --name SliderTrajectoryLab slider_lab.py
-      - name: Copy demo files
-        run: xcopy /E /I /Y demo dist\demo
+          pip install matplotlib playwright pyinstaller
+          python -m playwright install chromium
+      - name: Build LiuHen EXE
+        run: pyinstaller --onefile --windowed --name LiuHen liuhen.py
+      - name: Copy runtime files
+        run: |
+          xcopy /E /I /Y demo dist\demo
+          xcopy /E /I /Y src dist\src
+          copy slider_lab.py dist\slider_lab.py
+          copy authorized_gui_tester.py dist\authorized_gui_tester.py
+          copy behavior_gui.py dist\behavior_gui.py
+          copy DISCLAIMER.md dist\DISCLAIMER.md
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: SliderTrajectoryLab-windows
-          path: |
-            dist/SliderTrajectoryLab.exe
-            dist/demo/**
+          name: LiuHen-windows
+          path: dist/**
