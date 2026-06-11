@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Local Event & Fingerprint Diagnostics</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.panel{background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:16px}.zone{height:220px;border:2px dashed #93c5fd;border-radius:14px;background:#eff6ff;display:grid;place-items:center;color:#1d4ed8;font-weight:600}.bad{color:#dc2626}.ok{color:#059669}.warn{color:#d97706}pre{max-height:280px;overflow:auto}
+  </style>
+</head>
+<body>
+  <main class="card" style="width:min(1100px,96vw)">
+    <h1>本地事件完整性与环境诊断</h1>
+    <p>用于本地/授权环境下检查 pointer、mouse、touch 事件链路与浏览器环境信号。此页面不伪装、不绕过任何网站。</p>
+    <div class="grid">
+      <section class="panel">
+        <h2>交互测试区</h2>
+        <div id="zone" class="zone">在这里移动、点击、按住拖动或触摸</div>
+        <p><button id="clear">清空事件</button> <button id="export">导出事件 JSON</button></p>
+      </section>
+      <section class="panel">
+        <h2>完整性评分</h2>
+        <pre id="score"></pre>
+      </section>
+      <section class="panel">
+        <h2>事件日志</h2>
+        <pre id="events"></pre>
+      </section>
+      <section class="panel">
+        <h2>浏览器环境诊断</h2>
+        <pre id="fp"></pre>
+      </section>
+    </div>
+  </main>
+  <script src="event_diagnostics.js"></script>
+</body>
+</html>
