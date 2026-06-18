@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import tkinter as tk
+from html import escape
 from pathlib import Path
 from tkinter import filedialog, messagebox, ttk
 
@@ -101,13 +102,13 @@ class ReportCenter(tk.Tk):
     def make_html(self):
         cards = []
         for f in self.files:
-            data = json.dumps(f['data'], ensure_ascii=False, indent=2)
+            data = escape(json.dumps(f['data'], ensure_ascii=False, indent=2))
             cards.append(f"""
 <section class='card'>
-  <h2>{f['type']}</h2>
-  <p><b>文件：</b>{f['path']}</p>
-  <p><b>摘要：</b>{f['summary']}</p>
-  <details><summary>查看原始 JSON</summary><pre>{self.escape(data)}</pre></details>
+  <h2>{escape(f['type'])}</h2>
+  <p><b>文件：</b>{escape(f['path'])}</p>
+  <p><b>摘要：</b>{escape(f['summary'])}</p>
+  <details><summary>查看原始 JSON</summary><pre>{data}</pre></details>
 </section>
 """)
         return f"""<!doctype html><html><head><meta charset='utf-8'><title>留痕综合测试报告</title>
@@ -118,10 +119,6 @@ class ReportCenter(tk.Tk):
 <h2>结论说明</h2>
 <p>请结合授权范围、测试目标、页面流程、账号/IP/Session/Token 等服务端因素综合判断。本报告不代表可通过任何真实网站风控。</p>
 </body></html>"""
-
-    @staticmethod
-    def escape(s):
-        return s.replace('&','&amp;').replace('<','&lt;').replace('>','&gt;')
 
 if __name__ == '__main__':
     ReportCenter().mainloop()

@@ -4,6 +4,7 @@ import json
 import threading
 import time
 import tkinter as tk
+from html import escape
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from tkinter import filedialog, messagebox, ttk
@@ -202,8 +203,13 @@ class BehaviorGui(tk.Tk):
         messagebox.showinfo("完成", f"已导出报告：{path}")
 
     def make_html(self, r):
-        rows = "".join(f"<tr><td>{x['action']}</td><td>{'✅' if x['ok'] else '❌'}</td><td>{x['elapsed_ms']}</td><td><pre>{x['detail']}</pre></td></tr>" for x in r.get("logs", []))
-        return f"""<!doctype html><html><head><meta charset='utf-8'><title>留痕行为会话报告</title><style>body{{font-family:system-ui,sans-serif;padding:24px}}table{{border-collapse:collapse;width:100%}}td,th{{border:1px solid #ddd;padding:8px;vertical-align:top}}pre{{white-space:pre-wrap;margin:0}}.ok{{color:#059669}}</style></head><body><h1>留痕行为会话报告</h1><p>URL: {r.get('url')}</p><p>Scope: {r.get('scope')}</p><h2>摘要</h2><pre>{json.dumps(r.get('summary'),ensure_ascii=False,indent=2)}</pre><h2>动作日志</h2><table><tr><th>动作</th><th>结果</th><th>耗时ms</th><th>详情</th></tr>{rows}</table><p>说明：本报告用于本地/自有/授权测试范围内的行为会话评估。</p></body></html>"""
+        rows = "".join(
+            f"<tr><td>{escape(str(x['action']))}</td><td>{'OK' if x['ok'] else 'FAIL'}</td>"
+            f"<td>{escape(str(x['elapsed_ms']))}</td><td><pre>{escape(str(x['detail']))}</pre></td></tr>"
+            for x in r.get("logs", [])
+        )
+        summary = escape(json.dumps(r.get('summary'), ensure_ascii=False, indent=2))
+        return f"""<!doctype html><html><head><meta charset='utf-8'><title>留痕行为会话报告</title><style>body{{font-family:system-ui,sans-serif;padding:24px}}table{{border-collapse:collapse;width:100%}}td,th{{border:1px solid #ddd;padding:8px;vertical-align:top}}pre{{white-space:pre-wrap;margin:0}}.ok{{color:#059669}}</style></head><body><h1>留痕行为会话报告</h1><p>URL: {escape(str(r.get('url','')))}</p><p>Scope: {escape(str(r.get('scope','')))}</p><h2>摘要</h2><pre>{summary}</pre><h2>动作日志</h2><table><tr><th>动作</th><th>结果</th><th>耗时ms</th><th>详情</th></tr>{rows}</table><p>说明：本报告用于本地/自有/授权测试范围内的行为会话评估。</p></body></html>"""
 
 if __name__ == "__main__":
     BehaviorGui().mainloop()

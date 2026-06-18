@@ -3,10 +3,11 @@ from __future__ import annotations
 import subprocess
 import sys
 import tkinter as tk
+import runpy
 from pathlib import Path
 from tkinter import messagebox, ttk
 
-ROOT = Path(__file__).resolve().parent
+ROOT = Path(sys.executable).resolve().parent if getattr(sys, "frozen", False) else Path(__file__).resolve().parent
 PY = sys.executable
 
 TOOLS = {
@@ -22,17 +23,44 @@ TOOLS = {
         "script": "risk_gui.py",
         "desc": "导入浏览器诊断JSON，自动评分环境一致性、事件链和自动化风险，导出HTML报告。",
     },
+    "综合报告中心": {
+        "script": "report_center.py",
+        "desc": "汇总行为会话、授权滑块测试、风险分析和环境体检 JSON，生成统一 HTML 报告。",
+    },
     "行为会话测试": {
         "script": "behavior_gui.py",
         "desc": "编排停留、鼠标游走、滚动、点击、输入、等待等完整人类行为会话。",
     },
 }
 
+TOOL_SCRIPT_BY_NAME = {name: info["script"] for name, info in TOOLS.items()}
+
+
+def run_tool(name: str) -> int:
+    script_name = TOOL_SCRIPT_BY_NAME.get(name)
+    if not script_name:
+        messagebox.showerror("未知工具", name)
+        return 1
+    script = ROOT / script_name
+    if not script.exists():
+        messagebox.showerror("文件不存在", f"找不到：{script}")
+        return 1
+    sys.path.insert(0, str(ROOT))
+    runpy.run_path(str(script), run_name="__main__")
+    return 0
+
+
+def smoke_check() -> int:
+    missing = [script for script in TOOL_SCRIPT_BY_NAME.values() if not (ROOT / script).exists()]
+    missing.extend(name for name in ["demo/event_diagnostics.html", "src/trajectory.py"] if not (ROOT / name).exists())
+    return 1 if missing else 0
+
+
 class LiuHenLauncher(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("留痕")
-        self.geometry("860x560")
+        self.geometry("980x600")
         self.resizable(False, False)
         self._build()
 
@@ -80,7 +108,10 @@ class LiuHenLauncher(tk.Tk):
             messagebox.showerror("文件不存在", f"找不到：{script}")
             return
         try:
-            subprocess.Popen([PY, str(script)], cwd=str(ROOT))
+            if getattr(sys, "frozen", False):
+                subprocess.Popen([PY, "--open-tool", name], cwd=str(ROOT))
+            else:
+                subprocess.Popen([PY, str(script)], cwd=str(ROOT))
         except Exception as e:
             messagebox.showerror("启动失败", str(e))
 
@@ -111,4 +142,8 @@ class LiuHenLauncher(tk.Tk):
             messagebox.showerror("打开失败", str(e))
 
 if __name__ == "__main__":
+    if "--smoke-check" in sys.argv:
+        raise SystemExit(smoke_check())
+    if len(sys.argv) >= 3 and sys.argv[1] == "--open-tool":
+        raise SystemExit(run_tool(sys.argv[2]))
     LiuHenLauncher().mainloop()

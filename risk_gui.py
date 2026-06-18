@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import tkinter as tk
+from html import escape
 from pathlib import Path
 from tkinter import filedialog, messagebox, ttk
 
@@ -104,8 +105,18 @@ class RiskGui(tk.Tk):
         fp = self.result.get("fingerprint", {})
         ev = self.result.get("events") or {}
         risks = fp.get("risks", []) + ev.get("risks", [])
-        rows = "".join(f"<tr><td>{r.get('level')}</td><td>{r.get('category')}</td><td>{r.get('field')}</td><td>{r.get('message')}</td><td>{r.get('suggestion')}</td></tr>" for r in risks)
-        return f"""<!doctype html><html><head><meta charset='utf-8'><title>留痕风险分析报告</title><style>body{{font-family:system-ui,sans-serif;padding:24px}}table{{border-collapse:collapse;width:100%}}td,th{{border:1px solid #ddd;padding:8px;vertical-align:top}}pre{{background:#f6f8fa;padding:12px;border-radius:8px;white-space:pre-wrap}}</style></head><body><h1>留痕风险分析报告</h1><p>来源文件：{self.source_path}</p><h2>摘要</h2><ul><li>环境评分：{fp.get('score','-')}/100</li><li>环境结论：{fp.get('verdict','-')}</li><li>事件评分：{ev.get('score','无')}</li></ul><h2>风险项</h2><table><tr><th>等级</th><th>类别</th><th>字段</th><th>问题</th><th>建议</th></tr>{rows}</table><h2>原始分析JSON</h2><pre>{json.dumps(self.result,ensure_ascii=False,indent=2)}</pre><p>说明：本报告仅用于本地/自有/授权测试中的防御评估与质量检查。</p></body></html>"""
+        rows = "".join(
+            "<tr>"
+            f"<td>{escape(str(r.get('level','')))}</td>"
+            f"<td>{escape(str(r.get('category','')))}</td>"
+            f"<td>{escape(str(r.get('field','')))}</td>"
+            f"<td>{escape(str(r.get('message','')))}</td>"
+            f"<td>{escape(str(r.get('suggestion','')))}</td>"
+            "</tr>"
+            for r in risks
+        )
+        raw = escape(json.dumps(self.result, ensure_ascii=False, indent=2))
+        return f"""<!doctype html><html><head><meta charset='utf-8'><title>留痕风险分析报告</title><style>body{{font-family:system-ui,sans-serif;padding:24px}}table{{border-collapse:collapse;width:100%}}td,th{{border:1px solid #ddd;padding:8px;vertical-align:top}}pre{{background:#f6f8fa;padding:12px;border-radius:8px;white-space:pre-wrap}}</style></head><body><h1>留痕风险分析报告</h1><p>来源文件：{escape(self.source_path)}</p><h2>摘要</h2><ul><li>环境评分：{escape(str(fp.get('score','-')))}/100</li><li>环境结论：{escape(str(fp.get('verdict','-')))}</li><li>事件评分：{escape(str(ev.get('score','无')))}</li></ul><h2>风险项</h2><table><tr><th>等级</th><th>类别</th><th>字段</th><th>问题</th><th>建议</th></tr>{rows}</table><h2>原始分析JSON</h2><pre>{raw}</pre><p>说明：本报告仅用于本地/自有/授权测试中的防御评估与质量检查。</p></body></html>"""
 
 if __name__ == "__main__":
     RiskGui().mainloop()

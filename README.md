@@ -167,7 +167,24 @@ demo/event_diagnostics.js
 
 ---
 
-### 6. 网络诊断
+### 6. 综合报告中心
+
+入口文件：
+
+```text
+report_center.py
+```
+
+功能：
+
+- 导入行为会话、授权滑块测试、风险分析、环境体检等 JSON；
+- 自动识别报告类型与摘要；
+- 生成统一 HTML 报告；
+- 对报告内容进行 HTML 转义，避免测试数据中的特殊字符破坏报告结构。
+
+---
+
+### 7. 网络诊断
 
 文件：
 
@@ -228,12 +245,13 @@ liuhen.py
 python liuhen.py
 ```
 
-打开后会看到四个入口：
+打开后会看到五个入口：
 
 ```text
 轨迹实验室
 授权滑块测试
 风险分析中心
+综合报告中心
 行为会话测试
 ```
 
@@ -244,7 +262,8 @@ python liuhen.py
 2. 用「行为会话测试」编排真实人类网页操作；
 3. 用「授权滑块测试」测试自有或授权页面；
 4. 用「风险分析中心」分析事件链和环境自然度；
-5. 导出 JSON / HTML / PNG / CSV 留档。
+5. 用「综合报告中心」汇总 JSON 结果并导出 HTML 留档；
+6. 导出 JSON / HTML / PNG / CSV 留档。
 ```
 
 ---
@@ -271,6 +290,18 @@ LiuHen-windows
 
 ---
 
+## 开发与验证
+
+快速静态检查：
+
+```bash
+python scripts/smoke_check.py
+```
+
+它会检查统一启动器中的入口文件、关键资源文件以及基础轨迹生成/分析是否可用。GitHub Actions 在打包 Windows EXE 前也会运行该检查。
+
+---
+
 ## 项目结构
 
 ```text
@@ -280,6 +311,7 @@ slider-captcha-lab/
 ├─ authorized_gui_tester.py     # 授权滑块测试台
 ├─ behavior_gui.py              # 行为会话测试台
 ├─ risk_gui.py                  # 风险分析中心
+├─ report_center.py             # 综合报告中心
 ├─ start_liuhen.bat             # Windows 一键启动
 ├─ build_exe.bat                # Windows 打包脚本
 ├─ requirements.txt             # 依赖列表
