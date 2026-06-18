@@ -10,23 +10,15 @@ from playwright.sync_api import sync_playwright
 
 try:
     from browser_context import close_browser_context, launch_browser_context, manual_navigation_enabled, manual_wait_ms
+    from profile_utils import load_profile, resolve_url
 except Exception:
     from src.browser_context import close_browser_context, launch_browser_context, manual_navigation_enabled, manual_wait_ms
-
-ROOT = Path(__file__).resolve().parents[1]
-
-
-def _resolve_url(url: str) -> str:
-    if url.startswith(("http://", "https://", "file://")):
-        return url
-    return (ROOT / url).resolve().as_uri()
+    from src.profile_utils import load_profile, resolve_url
 
 
 def probe_profile(profile_path: str, headless: bool = False) -> dict[str, Any]:
-    profile = json.loads(Path(profile_path).read_text(encoding="utf-8"))
-    if profile.get("authorized_only") is not True:
-        raise ValueError("Profile must set authorized_only=true. Only local/owned/authorized pages are supported.")
-    url = _resolve_url(profile["url"])
+    profile = load_profile(profile_path)
+    url = resolve_url(profile["url"])
     with sync_playwright() as p:
         context, browser = launch_browser_context(p, profile, headless=headless, viewport=profile.get("viewport", {"width": 1280, "height": 850}))
         try:
@@ -41,11 +33,13 @@ def probe_profile(profile_path: str, headless: bool = False) -> dict[str, Any]:
             frames = []
             for index, frame in enumerate(page.frames):
                 frames.append(_probe_frame(frame, index))
+            summary = _summarize_frames(frames)
             return {
                 "profile": profile.get("name", profile_path),
                 "url": page.url,
                 "title": page.title(),
                 "created_at_ms": round(time.time() * 1000),
+                "summary": summary,
                 "frames": frames,
                 "scope": "local_owned_or_explicitly_authorized_pages_only",
             }
@@ -102,6 +96,41 @@ def _probe_frame(frame, index: int) -> dict[str, Any]:
         "url": frame.url,
         "candidates": data,
     }
+
+
+def _summarize_frames(frames: list[dict[str, Any]]) -> dict[str, Any]:
+    all_candidates = [
+        candidate
+        for frame in frames
+        for candidate in frame.get("candidates", [])
+        if "error" not in candidate
+    ]
+    visible = [candidate for candidate in all_candidates if candidate.get("visible")]
+    slider_like = [
+        c.get("selector")
+        for c in visible
+        if _contains_any(c, ["slider", "drag", "captcha"])
+    ][:8]
+    button_like = [
+        c.get("selector")
+        for c in visible
+        if c.get("tag") == "button" or c.get("role") == "button"
+    ][:8]
+    return {
+        "frame_count": len(frames),
+        "candidate_count": len(all_candidates),
+        "visible_candidate_count": len(visible),
+        "suggested_slider_selectors": slider_like,
+        "suggested_button_selectors": button_like,
+    }
+
+
+def _contains_any(candidate: dict[str, Any], words: list[str]) -> bool:
+    haystack = " ".join(
+        str(candidate.get(key, "")).lower()
+        for key in ["id", "className", "role", "type", "text", "selector"]
+    )
+    return any(word in haystack for word in words)
 
 
 if __name__ == "__main__":

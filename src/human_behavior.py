@@ -13,13 +13,13 @@ from playwright.sync_api import sync_playwright
 try:
     from browser_context import close_browser_context, launch_browser_context, manual_navigation_enabled, manual_wait_ms
     from page_targets import resolve_frame_scope
+    from profile_utils import load_profile, resolve_url
     from trajectory import generate_trajectory, Point
 except Exception:
     from src.browser_context import close_browser_context, launch_browser_context, manual_navigation_enabled, manual_wait_ms
     from src.page_targets import resolve_frame_scope
+    from src.profile_utils import load_profile, resolve_url
     from src.trajectory import generate_trajectory, Point
-
-ROOT = Path(__file__).resolve().parents[1]
 
 @dataclass
 class ActionLog:
@@ -27,12 +27,6 @@ class ActionLog:
     ok: bool
     elapsed_ms: float
     detail: str
-
-
-def _resolve_url(url: str) -> str:
-    if url.startswith(("http://", "https://", "file://")):
-        return url
-    return (ROOT / url).resolve().as_uri()
 
 
 def _sleep_ms(page, ms: int, jitter: float = 0.18):
@@ -106,10 +100,8 @@ def human_fill(page, selector: str, text: str, scope=None):
 
 
 def run_session(profile_path: str, headless: bool = False) -> dict[str, Any]:
-    profile = json.loads(Path(profile_path).read_text(encoding="utf-8"))
-    if profile.get("authorized_only") is not True:
-        raise ValueError("Profile must set authorized_only=true. Only local/owned/authorized pages are supported.")
-    url = _resolve_url(profile["url"])
+    profile = load_profile(profile_path)
+    url = resolve_url(profile["url"])
     actions = profile.get("actions", [])
     logs: list[ActionLog] = []
     with sync_playwright() as p:

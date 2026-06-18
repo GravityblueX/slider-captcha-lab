@@ -371,6 +371,14 @@ python scripts/smoke_check.py
 
 它会检查统一启动器中的入口文件、关键资源文件以及基础轨迹生成/分析是否可用。GitHub Actions 在打包 Windows EXE 前也会运行该检查。
 
+本地端到端回归检查：
+
+```bash
+python scripts/regression_check.py
+```
+
+它会使用 `examples/authorized_deep_page_profile.json` 跑本地授权滑块 demo，并验证页面结构探测能导出 frame 与候选控件。
+
 ---
 
 ## 项目结构

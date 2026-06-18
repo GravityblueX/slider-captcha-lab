@@ -3,7 +3,6 @@ from __future__ import annotations
 import json
 import time
 from dataclasses import dataclass
-from pathlib import Path
 from typing import Any
 
 from playwright.sync_api import sync_playwright
@@ -11,13 +10,13 @@ from playwright.sync_api import sync_playwright
 try:
     from browser_context import close_browser_context, launch_browser_context, manual_navigation_enabled, manual_wait_ms
     from page_targets import first_working_locator, resolve_frame_scope, selector_candidates
+    from profile_utils import load_profile, resolve_url
     from trajectory import generate_trajectory
 except Exception:
     from src.browser_context import close_browser_context, launch_browser_context, manual_navigation_enabled, manual_wait_ms
     from src.page_targets import first_working_locator, resolve_frame_scope, selector_candidates
+    from src.profile_utils import load_profile, resolve_url
     from src.trajectory import generate_trajectory
-
-ROOT = Path(__file__).resolve().parents[1]
 
 @dataclass
 class AttemptResult:
@@ -28,24 +27,15 @@ class AttemptResult:
     score_hint: str
 
 
-def _resolve_url(url: str) -> str:
-    if url.startswith("http://") or url.startswith("https://") or url.startswith("file://"):
-        return url
-    p = (ROOT / url).resolve()
-    return p.as_uri()
-
-
 def run_profile(profile_path: str, headless: bool = False, require_authorized_flag: bool = True) -> dict[str, Any]:
     """Run a configurable test against a local/owned/authorized page.
 
     This helper is designed for QA and authorized testing. A profile must include
     `authorized_only: true` to make the intended scope explicit.
     """
-    profile = json.loads(Path(profile_path).read_text(encoding="utf-8"))
-    if require_authorized_flag and profile.get("authorized_only") is not True:
-        raise ValueError("Profile must set authorized_only=true. Only local/owned/authorized pages are supported.")
+    profile = load_profile(profile_path, require_authorized=require_authorized_flag)
 
-    url = _resolve_url(profile["url"])
+    url = resolve_url(profile["url"])
     slider_selectors = selector_candidates(profile, "slider_selector", "#slider")
     knob_selectors = selector_candidates(profile, "knob_selector", "#knob")
     success_selectors = selector_candidates(profile, "success_selector")
