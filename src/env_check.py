@@ -15,7 +15,8 @@ ROOT = Path(__file__).resolve().parents[1]
 REQUIRED_FILES = [
     'liuhen.py', 'slider_lab.py', 'authorized_gui_tester.py', 'behavior_gui.py', 'risk_gui.py', 'report_center.py',
     'requirements.txt', 'DISCLAIMER.md', 'demo/event_diagnostics.html', 'demo/event_diagnostics.js',
-    'src/trajectory.py', 'src/browser_context.py', 'src/human_behavior.py', 'src/risk_analyzer.py', 'src/network_diagnostics.py'
+    'src/trajectory.py', 'src/browser_context.py', 'src/page_probe.py', 'src/page_targets.py',
+    'src/human_behavior.py', 'src/risk_analyzer.py', 'src/network_diagnostics.py'
 ]
 REQUIRED_MODULES = ['matplotlib', 'playwright', 'pandas']
 

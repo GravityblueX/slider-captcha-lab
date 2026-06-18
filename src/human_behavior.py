@@ -12,9 +12,11 @@ from playwright.sync_api import sync_playwright
 
 try:
     from browser_context import close_browser_context, launch_browser_context, manual_navigation_enabled, manual_wait_ms
+    from page_targets import resolve_frame_scope
     from trajectory import generate_trajectory, Point
 except Exception:
     from src.browser_context import close_browser_context, launch_browser_context, manual_navigation_enabled, manual_wait_ms
+    from src.page_targets import resolve_frame_scope
     from src.trajectory import generate_trajectory, Point
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -77,8 +79,8 @@ def human_scroll(page, amount: int = 600, steps: int | None = None):
         page.wait_for_timeout(random.randint(45, 180))
 
 
-def human_click(page, selector: str):
-    loc = page.locator(selector)
+def human_click(page, selector: str, scope=None):
+    loc = (scope or page).locator(selector)
     loc.wait_for(state="visible", timeout=10000)
     box = loc.bounding_box()
     if not box:
@@ -94,8 +96,8 @@ def human_click(page, selector: str):
     page.mouse.up()
 
 
-def human_fill(page, selector: str, text: str):
-    human_click(page, selector)
+def human_fill(page, selector: str, text: str, scope=None):
+    human_click(page, selector, scope)
     for ch in text:
         page.keyboard.type(ch)
         page.wait_for_timeout(random.randint(35, 180))
@@ -127,6 +129,7 @@ def run_session(profile_path: str, headless: bool = False) -> dict[str, Any]:
             else:
                 page.goto(url, wait_until="domcontentloaded", timeout=20000)
                 logs.append(ActionLog("goto", True, round((time.perf_counter() - t0) * 1000, 2), url))
+            scope = resolve_frame_scope(page, profile)
             for action in actions:
                 at = time.perf_counter()
                 typ = action.get("type")
@@ -138,11 +141,11 @@ def run_session(profile_path: str, headless: bool = False) -> dict[str, Any]:
                     elif typ == "scroll":
                         human_scroll(page, int(action.get("amount", 600)), action.get("steps"))
                     elif typ == "click":
-                        human_click(page, action["selector"])
+                        human_click(page, action["selector"], scope)
                     elif typ == "fill":
-                        human_fill(page, action["selector"], action.get("text", ""))
+                        human_fill(page, action["selector"], action.get("text", ""), scope)
                     elif typ == "wait_for":
-                        page.wait_for_selector(action["selector"], timeout=int(action.get("timeout", 10000)))
+                        scope.wait_for_selector(action["selector"], timeout=int(action.get("timeout", 10000)))
                     else:
                         raise ValueError(f"Unknown action type: {typ}")
                     logs.append(ActionLog(str(typ), True, round((time.perf_counter() - at) * 1000, 2), json.dumps(action, ensure_ascii=False)))

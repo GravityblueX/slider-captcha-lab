@@ -24,6 +24,8 @@ REQUIRED_FILES = [
     "src/trajectory.py",
     "src/analyzer.py",
     "src/browser_context.py",
+    "src/page_probe.py",
+    "src/page_targets.py",
     "src/human_behavior.py",
     "src/risk_analyzer.py",
     "src/network_diagnostics.py",

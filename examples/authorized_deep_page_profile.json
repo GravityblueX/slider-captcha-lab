@@ -1,9 +1,9 @@
 {
   "name": "local-authorized-deep-page-example",
   "url": "demo/index.html",
-  "slider_selector": "#slider",
-  "knob_selector": "#knob",
-  "success_selector": "#status",
+  "slider_selectors": ["#slider"],
+  "knob_selectors": ["#knob"],
+  "success_selectors": ["#status"],
   "success_text_contains": "completed",
   "duration_ms": 900,
   "steps": 90,
@@ -14,6 +14,9 @@
     "extension_paths": [],
     "manual_navigation": false,
     "manual_wait_ms": 60000
+  },
+  "target": {
+    "frame_chain": []
   },
   "authorized_only": true
 }

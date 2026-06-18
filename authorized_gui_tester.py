@@ -11,6 +11,8 @@ from tkinter import filedialog, messagebox, ttk
 from playwright.sync_api import sync_playwright
 
 from src.browser_context import close_browser_context, launch_browser_context, manual_navigation_enabled, manual_wait_ms
+from src.page_probe import probe_profile
+from src.page_targets import first_working_locator, resolve_frame_scope, selector_candidates
 
 try:
     from src.trajectory import generate_trajectory
@@ -59,6 +61,7 @@ class AuthorizedTester(tk.Tk):
         self.knob = tk.StringVar(value="")
         self.success = tk.StringVar(value="")
         self.success_text = tk.StringVar(value="")
+        self.frame_chain = tk.StringVar(value="")
         self.distance = tk.IntVar(value=320)
         self.duration = tk.IntVar(value=900)
         self.steps = tk.IntVar(value=90)
@@ -76,32 +79,34 @@ class AuthorizedTester(tk.Tk):
             ("滑块按钮 selector", self.knob, 34),
             ("成功判断 selector", self.success, 34),
             ("成功文本包含", self.success_text, 34),
+            ("frame_chain JSON", self.frame_chain, 72),
         ]
         for i, (label, var, width) in enumerate(rows):
             ttk.Label(form, text=label).grid(row=i, column=0, sticky="w", pady=4)
             ttk.Entry(form, textvariable=var, width=width).grid(row=i, column=1, columnspan=5, sticky="we", pady=4)
 
-        ttk.Label(form, text="距离").grid(row=5, column=0, sticky="w")
-        ttk.Spinbox(form, from_=60, to=1200, textvariable=self.distance, width=10).grid(row=5, column=1, sticky="w")
-        ttk.Label(form, text="耗时ms").grid(row=5, column=2, sticky="w")
-        ttk.Spinbox(form, from_=200, to=4000, textvariable=self.duration, width=10).grid(row=5, column=3, sticky="w")
-        ttk.Label(form, text="点数").grid(row=5, column=4, sticky="w")
-        ttk.Spinbox(form, from_=10, to=400, textvariable=self.steps, width=10).grid(row=5, column=5, sticky="w")
-        ttk.Label(form, text="抖动").grid(row=6, column=0, sticky="w")
-        ttk.Spinbox(form, from_=0, to=8, increment=.1, textvariable=self.jitter, width=10).grid(row=6, column=1, sticky="w")
-        ttk.Checkbutton(form, text="显示浏览器窗口", variable=self.headless, onvalue=False, offvalue=True).grid(row=6, column=2, sticky="w")
-        ttk.Checkbutton(form, text="我确认该 URL 属于本地/自有/已授权测试范围", variable=self.authorized).grid(row=6, column=3, columnspan=3, sticky="w")
-        ttk.Label(form, text="Profile目录").grid(row=7, column=0, sticky="w")
-        ttk.Entry(form, textvariable=self.user_data_dir, width=34).grid(row=7, column=1, columnspan=2, sticky="we", pady=4)
-        ttk.Label(form, text="扩展目录(;分隔)").grid(row=7, column=3, sticky="w")
-        ttk.Entry(form, textvariable=self.extension_paths, width=34).grid(row=7, column=4, columnspan=2, sticky="we", pady=4)
-        ttk.Checkbutton(form, text="手动深层页面模式", variable=self.manual_navigation).grid(row=8, column=1, sticky="w")
-        ttk.Label(form, text="等待秒").grid(row=8, column=2, sticky="e")
-        ttk.Spinbox(form, from_=0, to=600, textvariable=self.manual_wait_seconds, width=8).grid(row=8, column=3, sticky="w")
+        ttk.Label(form, text="距离").grid(row=6, column=0, sticky="w")
+        ttk.Spinbox(form, from_=60, to=1200, textvariable=self.distance, width=10).grid(row=6, column=1, sticky="w")
+        ttk.Label(form, text="耗时ms").grid(row=6, column=2, sticky="w")
+        ttk.Spinbox(form, from_=200, to=4000, textvariable=self.duration, width=10).grid(row=6, column=3, sticky="w")
+        ttk.Label(form, text="点数").grid(row=6, column=4, sticky="w")
+        ttk.Spinbox(form, from_=10, to=400, textvariable=self.steps, width=10).grid(row=6, column=5, sticky="w")
+        ttk.Label(form, text="抖动").grid(row=7, column=0, sticky="w")
+        ttk.Spinbox(form, from_=0, to=8, increment=.1, textvariable=self.jitter, width=10).grid(row=7, column=1, sticky="w")
+        ttk.Checkbutton(form, text="显示浏览器窗口", variable=self.headless, onvalue=False, offvalue=True).grid(row=7, column=2, sticky="w")
+        ttk.Checkbutton(form, text="我确认该 URL 属于本地/自有/已授权测试范围", variable=self.authorized).grid(row=7, column=3, columnspan=3, sticky="w")
+        ttk.Label(form, text="Profile目录").grid(row=8, column=0, sticky="w")
+        ttk.Entry(form, textvariable=self.user_data_dir, width=34).grid(row=8, column=1, columnspan=2, sticky="we", pady=4)
+        ttk.Label(form, text="扩展目录(;分隔)").grid(row=8, column=3, sticky="w")
+        ttk.Entry(form, textvariable=self.extension_paths, width=34).grid(row=8, column=4, columnspan=2, sticky="we", pady=4)
+        ttk.Checkbutton(form, text="手动深层页面模式", variable=self.manual_navigation).grid(row=9, column=1, sticky="w")
+        ttk.Label(form, text="等待秒").grid(row=9, column=2, sticky="e")
+        ttk.Spinbox(form, from_=0, to=600, textvariable=self.manual_wait_seconds, width=8).grid(row=9, column=3, sticky="w")
 
         btns = ttk.Frame(main)
         btns.pack(fill=tk.X, pady=10)
         ttk.Button(btns, text="运行四种策略", command=self.run_async).pack(side=tk.LEFT, padx=4)
+        ttk.Button(btns, text="探测页面结构", command=self.probe_async).pack(side=tk.LEFT, padx=4)
         ttk.Button(btns, text="导入配置JSON", command=self.load_profile).pack(side=tk.LEFT, padx=4)
         ttk.Button(btns, text="导出配置JSON", command=self.save_profile).pack(side=tk.LEFT, padx=4)
         ttk.Button(btns, text="导出结果JSON", command=self.export_results).pack(side=tk.LEFT, padx=4)
@@ -128,9 +133,9 @@ class AuthorizedTester(tk.Tk):
         return {
             "name": "custom-authorized-target",
             "url": self.url.get().strip(),
-            "slider_selector": self.slider.get().strip(),
-            "knob_selector": self.knob.get().strip(),
-            "success_selector": self.success.get().strip(),
+            "slider_selectors": [x.strip() for x in self.slider.get().split(";") if x.strip()],
+            "knob_selectors": [x.strip() for x in self.knob.get().split(";") if x.strip()],
+            "success_selectors": [x.strip() for x in self.success.get().split(";") if x.strip()],
             "success_text_contains": self.success_text.get().strip(),
             "distance": self.distance.get(),
             "duration_ms": self.duration.get(),
@@ -143,8 +148,18 @@ class AuthorizedTester(tk.Tk):
                 "manual_navigation": self.manual_navigation.get(),
                 "manual_wait_ms": self.manual_wait_seconds.get() * 1000,
             },
+            "target": self.target_dict(),
             "authorized_only": True,
         }
+
+    def target_dict(self):
+        text = self.frame_chain.get().strip()
+        if not text:
+            return {}
+        try:
+            return {"frame_chain": json.loads(text)}
+        except Exception:
+            return {"frame_chain": [{"selector": text}]}
 
     def load_profile(self):
         path = filedialog.askopenfilename(filetypes=[("JSON", "*.json"), ("All", "*.*")])
@@ -152,10 +167,12 @@ class AuthorizedTester(tk.Tk):
             return
         data = json.loads(Path(path).read_text(encoding="utf-8"))
         self.url.set(data.get("url", ""))
-        self.slider.set(data.get("slider_selector", ""))
-        self.knob.set(data.get("knob_selector", ""))
-        self.success.set(data.get("success_selector", ""))
+        self.slider.set(";".join(data.get("slider_selectors", [])) or data.get("slider_selector", ""))
+        self.knob.set(";".join(data.get("knob_selectors", [])) or data.get("knob_selector", ""))
+        self.success.set(";".join(data.get("success_selectors", [])) or data.get("success_selector", ""))
         self.success_text.set(data.get("success_text_contains", ""))
+        target = data.get("target", {}) if isinstance(data.get("target", {}), dict) else {}
+        self.frame_chain.set(json.dumps(target.get("frame_chain", ""), ensure_ascii=False) if target.get("frame_chain") else "")
         self.distance.set(int(data.get("distance", 320)))
         self.duration.set(int(data.get("duration_ms", 900)))
         self.steps.set(int(data.get("steps", 90)))
@@ -179,6 +196,31 @@ class AuthorizedTester(tk.Tk):
         for i in self.table.get_children():
             self.table.delete(i)
         self.status.config(text="结果已清空。")
+
+    def probe_async(self):
+        if not self.authorized.get():
+            messagebox.showwarning("需要确认授权", "请先勾选授权范围确认。")
+            return
+        threading.Thread(target=self._probe, daemon=True).start()
+
+    def _probe(self):
+        tmp = Path("_tmp_authorized_probe_profile.json")
+        try:
+            tmp.write_text(json.dumps(self.profile_dict(), ensure_ascii=False, indent=2), encoding="utf-8")
+            self._status("页面结构探测中...")
+            result = probe_profile(str(tmp), headless=self.headless.get())
+            path = Path("page-probe-result.json").resolve()
+            path.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
+            self._status(f"探测完成：{path}")
+            self.after(0, lambda: messagebox.showinfo("探测完成", f"已保存：{path}"))
+        except Exception as e:
+            self._status(f"探测失败：{e}")
+            self.after(0, lambda: messagebox.showerror("探测失败", str(e)))
+        finally:
+            try:
+                tmp.unlink()
+            except Exception:
+                pass
 
     def run_async(self):
         if not self.authorized.get():
@@ -231,10 +273,11 @@ class AuthorizedTester(tk.Tk):
             url = _resolve_url(profile["url"])
             if manual_page is None:
                 page.goto(url, wait_until="domcontentloaded", timeout=20000)
-            page.wait_for_selector(profile["slider_selector"], timeout=10000)
-            page.wait_for_selector(profile["knob_selector"], timeout=10000)
-            slider = page.locator(profile["slider_selector"]).bounding_box()
-            knob = page.locator(profile["knob_selector"]).bounding_box()
+            scope = resolve_frame_scope(page, profile)
+            slider_loc, slider_selector = first_working_locator(scope, selector_candidates(profile, "slider_selector"), timeout=10000)
+            knob_loc, knob_selector = first_working_locator(scope, selector_candidates(profile, "knob_selector"), timeout=10000)
+            slider = slider_loc.bounding_box()
+            knob = knob_loc.bounding_box()
             if not slider or not knob:
                 raise RuntimeError("无法获取滑块或按钮位置，请检查 selector 是否正确。")
             start = (knob["x"] + knob["width"] / 2, knob["y"] + knob["height"] / 2)
@@ -251,11 +294,13 @@ class AuthorizedTester(tk.Tk):
             page.wait_for_timeout(700)
             reason = "拖动序列已完成。"
             ok = True
-            if profile.get("success_selector"):
-                txt = page.locator(profile["success_selector"]).inner_text(timeout=3000)
+            success_selectors = selector_candidates(profile, "success_selector")
+            if success_selectors:
+                success_loc, success_selector = first_working_locator(scope, success_selectors, timeout=3000)
+                txt = success_loc.inner_text(timeout=3000)
                 expected = profile.get("success_text_contains") or ""
                 ok = expected.lower() in txt.lower() if expected else bool(txt)
-                reason = f"success_selector文本: {txt!r}"
+                reason = f"slider={slider_selector!r}, knob={knob_selector!r}, success={success_selector!r}, 文本: {txt!r}"
             return Attempt(mode, ok, reason, round((time.perf_counter() - t0) * 1000, 2), profile["url"])
         except Exception as e:
             return Attempt(mode, False, str(e), round((time.perf_counter() - t0) * 1000, 2), profile.get("url", ""))

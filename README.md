@@ -69,6 +69,9 @@ authorized_gui_tester.py
 - 输入滑块轨道 selector；
 - 输入滑块按钮 selector；
 - 输入成功判断 selector；
+- 支持多个备用 selector，例如 `slider_selectors` / `knob_selectors` / `success_selectors`；
+- 支持 iframe / 多层 frame 定位；
+- 支持页面结构探测，导出 frames 与候选控件 JSON；
 - 自动运行多种轨迹策略；
 - 支持持久浏览器 Profile，用于保留授权测试环境中的登录态和本地存储；
 - 支持加载本地 Chrome 扩展目录；
@@ -105,6 +108,7 @@ behavior_gui.py
 - 支持持久浏览器 Profile；
 - 支持加载本地 Chrome 扩展目录；
 - 支持手动深层页面模式，适合自有系统里入口较深、需要人工登录或人工导航的页面；
+- 支持全局 frame 作用域，让点击、输入、等待元素动作落在授权 iframe 内；
 - 导入/导出 Profile；
 - 导出 HTML 测试报告。
 
@@ -285,6 +289,12 @@ python liuhen.py
     "extension_paths": ["C:/path/to/your-extension"],
     "manual_navigation": true,
     "manual_wait_ms": 60000
+  },
+  "target": {
+    "frame_chain": [
+      {"selector": "iframe#outer"},
+      {"url_contains": "/embedded/"}
+    ]
   }
 }
 ```
@@ -295,7 +305,37 @@ python liuhen.py
 - `extension_paths` 用于加载本地未打包 Chrome 扩展目录，多个扩展可用数组或 GUI 中的分号分隔；
 - `manual_navigation` 开启后，浏览器会先打开起始 URL，并等待指定时间；你可以在这段时间内手动完成登录、进入深层页面或切换标签页；
 - 等待结束后，工具会从当前页面继续执行动作链或滑块测试；
+- `target.frame_chain` 用于多层 iframe。每一层可使用 `selector`、`url_contains` 或 `name`；
+- 滑块测试支持多个备用 selector，例如：
+
+```json
+{
+  "slider_selectors": ["#slider", ".slider", "[data-testid='slider']"],
+  "knob_selectors": ["#knob", ".knob", "[role='button']"],
+  "success_selectors": ["#status", ".result"]
+}
+```
+
 - 这些能力仅用于本地、自有或明确授权测试，不用于绕过第三方网站验证码、风控、反爬虫或访问控制。
+
+---
+
+## 页面结构探测
+
+当授权页面入口较深、包含 iframe、或 selector 不好找时，可以先用页面探测工具导出结构：
+
+```bash
+python src/page_probe.py examples/authorized_deep_page_profile.json --headless --out page-probe-result.json
+```
+
+它会导出：
+
+- 当前页面 URL 和标题；
+- 所有 frame 的 `index / name / url`；
+- 常见按钮、输入框、可拖动元素、slider/captcha/drag 命名元素；
+- 每个候选元素的建议 selector、文本、可见性和位置。
+
+GUI 中的「授权滑块测试」也提供「探测页面结构」按钮，结果会保存为 `page-probe-result.json`。
 
 ---
 
@@ -357,6 +397,8 @@ slider-captcha-lab/
 │  ├─ trajectory.py             # 轨迹生成引擎
 │  ├─ analyzer.py               # 轨迹分析
 │  ├─ browser_context.py        # 持久Profile与扩展上下文
+│  ├─ page_probe.py             # 页面结构探测
+│  ├─ page_targets.py           # frame与备用selector解析
 │  ├─ recorder.py               # 鼠标轨迹记录
 │  ├─ authorized_page_tester.py # 授权页面测试命令行工具
 │  ├─ human_behavior.py         # 人类行为会话模拟

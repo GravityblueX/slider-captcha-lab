@@ -10,9 +10,11 @@ from playwright.sync_api import sync_playwright
 
 try:
     from browser_context import close_browser_context, launch_browser_context, manual_navigation_enabled, manual_wait_ms
+    from page_targets import first_working_locator, resolve_frame_scope, selector_candidates
     from trajectory import generate_trajectory
 except Exception:
     from src.browser_context import close_browser_context, launch_browser_context, manual_navigation_enabled, manual_wait_ms
+    from src.page_targets import first_working_locator, resolve_frame_scope, selector_candidates
     from src.trajectory import generate_trajectory
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -44,9 +46,9 @@ def run_profile(profile_path: str, headless: bool = False, require_authorized_fl
         raise ValueError("Profile must set authorized_only=true. Only local/owned/authorized pages are supported.")
 
     url = _resolve_url(profile["url"])
-    slider_selector = profile.get("slider_selector", "#slider")
-    knob_selector = profile.get("knob_selector", "#knob")
-    success_selector = profile.get("success_selector")
+    slider_selectors = selector_candidates(profile, "slider_selector", "#slider")
+    knob_selectors = selector_candidates(profile, "knob_selector", "#knob")
+    success_selectors = selector_candidates(profile, "success_selector")
     success_text_contains = profile.get("success_text_contains", "")
     modes = profile.get("modes", [profile.get("mode", "normal")])
     results: list[AttemptResult] = []
@@ -71,10 +73,11 @@ def run_profile(profile_path: str, headless: bool = False, require_authorized_fl
                 try:
                     if manual_page is None:
                         page.goto(url, wait_until="domcontentloaded", timeout=15000)
-                    page.wait_for_selector(knob_selector, timeout=8000)
-                    page.wait_for_selector(slider_selector, timeout=8000)
-                    knob = page.locator(knob_selector).bounding_box()
-                    slider = page.locator(slider_selector).bounding_box()
+                    scope = resolve_frame_scope(page, profile)
+                    knob_loc, knob_selector = first_working_locator(scope, knob_selectors, timeout=8000)
+                    slider_loc, slider_selector = first_working_locator(scope, slider_selectors, timeout=8000)
+                    knob = knob_loc.bounding_box()
+                    slider = slider_loc.bounding_box()
                     if not knob or not slider:
                         raise RuntimeError("Cannot locate slider or knob bounding box")
                     start = (knob["x"] + knob["width"] / 2, knob["y"] + knob["height"] / 2)
@@ -99,13 +102,14 @@ def run_profile(profile_path: str, headless: bool = False, require_authorized_fl
                         last_t = pt.t
                     page.mouse.up()
                     page.wait_for_timeout(500)
-                    if success_selector:
-                        text = page.locator(success_selector).inner_text(timeout=2000)
+                    if success_selectors:
+                        success_loc, success_selector = first_working_locator(scope, success_selectors, timeout=2000)
+                        text = success_loc.inner_text(timeout=2000)
                         ok = success_text_contains.lower() in text.lower() if success_text_contains else bool(text)
-                        reason = f"success_selector text={text!r}"
+                        reason = f"{mode}: slider={slider_selector!r}, knob={knob_selector!r}, success={success_selector!r}, text={text!r}"
                     else:
                         ok = True
-                        reason = "no success selector configured; drag sequence completed"
+                        reason = f"{mode}: drag sequence completed with slider={slider_selector!r}, knob={knob_selector!r}"
                 except Exception as e:
                     ok = False
                     reason = str(e)

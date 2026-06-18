@@ -45,6 +45,7 @@ class BehaviorGui(tk.Tk):
         self.extension_paths = tk.StringVar(value="")
         self.manual_navigation = tk.BooleanVar(value=False)
         self.manual_wait_seconds = tk.IntVar(value=60)
+        self.frame_chain = tk.StringVar(value="")
         ttk.Label(top, text="URL").grid(row=0, column=0, sticky="w")
         ttk.Entry(top, textvariable=self.url, width=84).grid(row=0, column=1, columnspan=7, sticky="we", padx=6)
         ttk.Checkbutton(top, text="我确认该 URL 属于本地/自有/已授权测试范围", variable=self.authorized).grid(row=1, column=1, columnspan=3, sticky="w", pady=6)
@@ -59,6 +60,8 @@ class BehaviorGui(tk.Tk):
         ttk.Checkbutton(top, text="手动深层页面模式", variable=self.manual_navigation).grid(row=3, column=1, sticky="w", pady=3)
         ttk.Label(top, text="等待秒").grid(row=3, column=2, sticky="e")
         ttk.Spinbox(top, from_=0, to=600, textvariable=self.manual_wait_seconds, width=8).grid(row=3, column=3, sticky="w")
+        ttk.Label(top, text="frame_chain JSON").grid(row=3, column=4, sticky="e")
+        ttk.Entry(top, textvariable=self.frame_chain, width=36).grid(row=3, column=5, columnspan=3, sticky="we", padx=6, pady=3)
 
         mid = ttk.PanedWindow(root, orient=tk.HORIZONTAL)
         mid.pack(fill=tk.BOTH, expand=True, pady=10)
@@ -156,8 +159,18 @@ class BehaviorGui(tk.Tk):
                 "manual_navigation": self.manual_navigation.get(),
                 "manual_wait_ms": self.manual_wait_seconds.get() * 1000,
             },
+            "target": self.target_dict(),
             "actions": [self.action_to_dict(a) for a in self.actions],
         }
+
+    def target_dict(self):
+        text = self.frame_chain.get().strip()
+        if not text:
+            return {}
+        try:
+            return {"frame_chain": json.loads(text)}
+        except Exception:
+            return {"frame_chain": [{"selector": text}]}
 
     def load_template(self):
         self.actions = [
@@ -180,6 +193,8 @@ class BehaviorGui(tk.Tk):
         self.extension_paths.set(";".join(ext) if isinstance(ext, list) else str(ext or ""))
         self.manual_navigation.set(bool(browser.get("manual_navigation", False)))
         self.manual_wait_seconds.set(int(browser.get("manual_wait_ms", 60000)) // 1000)
+        target = data.get("target", {}) if isinstance(data.get("target", {}), dict) else {}
+        self.frame_chain.set(json.dumps(target.get("frame_chain", ""), ensure_ascii=False) if target.get("frame_chain") else "")
         self.actions=[]
         for d in data.get("actions", []):
             self.actions.append(ActionItem(d.get("type","dwell"), d.get("selector",""), d.get("text",""), int(d.get("ms",1000)), int(d.get("amount",500)), int(d.get("timeout",10000)), int(d.get("duration_ms",1400)), bool(d.get("required", True))))
