@@ -1,0 +1,19 @@
+{
+  "name": "local-authorized-deep-page-example",
+  "url": "demo/index.html",
+  "slider_selector": "#slider",
+  "knob_selector": "#knob",
+  "success_selector": "#status",
+  "success_text_contains": "completed",
+  "duration_ms": 900,
+  "steps": 90,
+  "jitter": 1.6,
+  "modes": ["normal", "careful"],
+  "browser": {
+    "user_data_dir": ".liuhen/profiles/local-demo",
+    "extension_paths": [],
+    "manual_navigation": false,
+    "manual_wait_ms": 60000
+  },
+  "authorized_only": true
+}

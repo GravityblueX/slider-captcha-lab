@@ -41,6 +41,10 @@ class BehaviorGui(tk.Tk):
         self.headless = tk.BooleanVar(value=False)
         self.viewport_w = tk.IntVar(value=1280)
         self.viewport_h = tk.IntVar(value=850)
+        self.user_data_dir = tk.StringVar(value=".liuhen/profiles/default")
+        self.extension_paths = tk.StringVar(value="")
+        self.manual_navigation = tk.BooleanVar(value=False)
+        self.manual_wait_seconds = tk.IntVar(value=60)
         ttk.Label(top, text="URL").grid(row=0, column=0, sticky="w")
         ttk.Entry(top, textvariable=self.url, width=84).grid(row=0, column=1, columnspan=7, sticky="we", padx=6)
         ttk.Checkbutton(top, text="我确认该 URL 属于本地/自有/已授权测试范围", variable=self.authorized).grid(row=1, column=1, columnspan=3, sticky="w", pady=6)
@@ -48,6 +52,13 @@ class BehaviorGui(tk.Tk):
         ttk.Label(top, text="视口").grid(row=1, column=5, sticky="e")
         ttk.Spinbox(top, from_=800, to=2560, textvariable=self.viewport_w, width=8).grid(row=1, column=6, sticky="w")
         ttk.Spinbox(top, from_=600, to=1600, textvariable=self.viewport_h, width=8).grid(row=1, column=7, sticky="w")
+        ttk.Label(top, text="Profile目录").grid(row=2, column=0, sticky="w")
+        ttk.Entry(top, textvariable=self.user_data_dir, width=42).grid(row=2, column=1, columnspan=3, sticky="we", padx=6, pady=3)
+        ttk.Label(top, text="扩展目录(;分隔)").grid(row=2, column=4, sticky="e")
+        ttk.Entry(top, textvariable=self.extension_paths, width=36).grid(row=2, column=5, columnspan=3, sticky="we", padx=6, pady=3)
+        ttk.Checkbutton(top, text="手动深层页面模式", variable=self.manual_navigation).grid(row=3, column=1, sticky="w", pady=3)
+        ttk.Label(top, text="等待秒").grid(row=3, column=2, sticky="e")
+        ttk.Spinbox(top, from_=0, to=600, textvariable=self.manual_wait_seconds, width=8).grid(row=3, column=3, sticky="w")
 
         mid = ttk.PanedWindow(root, orient=tk.HORIZONTAL)
         mid.pack(fill=tk.BOTH, expand=True, pady=10)
@@ -134,7 +145,19 @@ class BehaviorGui(tk.Tk):
         return d
 
     def profile(self):
-        return {"name":"留痕行为会话", "url": self.url.get().strip(), "authorized_only": True, "viewport":{"width":self.viewport_w.get(), "height":self.viewport_h.get()}, "actions":[self.action_to_dict(a) for a in self.actions]}
+        return {
+            "name": "留痕行为会话",
+            "url": self.url.get().strip(),
+            "authorized_only": True,
+            "viewport": {"width": self.viewport_w.get(), "height": self.viewport_h.get()},
+            "browser": {
+                "user_data_dir": self.user_data_dir.get().strip(),
+                "extension_paths": [x.strip() for x in self.extension_paths.get().split(";") if x.strip()],
+                "manual_navigation": self.manual_navigation.get(),
+                "manual_wait_ms": self.manual_wait_seconds.get() * 1000,
+            },
+            "actions": [self.action_to_dict(a) for a in self.actions],
+        }
 
     def load_template(self):
         self.actions = [
@@ -151,6 +174,12 @@ class BehaviorGui(tk.Tk):
         data = json.loads(Path(path).read_text(encoding="utf-8"))
         self.url.set(data.get("url", "")); self.authorized.set(bool(data.get("authorized_only", False)))
         vp = data.get("viewport", {}); self.viewport_w.set(vp.get("width", 1280)); self.viewport_h.set(vp.get("height", 850))
+        browser = data.get("browser", {}) if isinstance(data.get("browser", {}), dict) else {}
+        self.user_data_dir.set(browser.get("user_data_dir", ".liuhen/profiles/default"))
+        ext = browser.get("extension_paths", [])
+        self.extension_paths.set(";".join(ext) if isinstance(ext, list) else str(ext or ""))
+        self.manual_navigation.set(bool(browser.get("manual_navigation", False)))
+        self.manual_wait_seconds.set(int(browser.get("manual_wait_ms", 60000)) // 1000)
         self.actions=[]
         for d in data.get("actions", []):
             self.actions.append(ActionItem(d.get("type","dwell"), d.get("selector",""), d.get("text",""), int(d.get("ms",1000)), int(d.get("amount",500)), int(d.get("timeout",10000)), int(d.get("duration_ms",1400)), bool(d.get("required", True))))
@@ -169,6 +198,8 @@ class BehaviorGui(tk.Tk):
         if not self.actions:
             messagebox.showwarning("没有动作", "请先添加或加载动作模板。")
             return
+        if self.manual_navigation.get():
+            messagebox.showinfo("手动深层页面模式", f"浏览器打开后，请在 {self.manual_wait_seconds.get()} 秒内手动完成登录、跳转或进入授权深层页面。等待结束后会从当前页面继续执行动作链。")
         threading.Thread(target=self._run, daemon=True).start()
 
     def _run(self):

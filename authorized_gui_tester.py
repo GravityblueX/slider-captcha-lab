@@ -10,6 +10,8 @@ from tkinter import filedialog, messagebox, ttk
 
 from playwright.sync_api import sync_playwright
 
+from src.browser_context import close_browser_context, launch_browser_context, manual_navigation_enabled, manual_wait_ms
+
 try:
     from src.trajectory import generate_trajectory
 except Exception:
@@ -63,6 +65,10 @@ class AuthorizedTester(tk.Tk):
         self.jitter = tk.DoubleVar(value=1.6)
         self.headless = tk.BooleanVar(value=False)
         self.authorized = tk.BooleanVar(value=False)
+        self.user_data_dir = tk.StringVar(value=".liuhen/profiles/default")
+        self.extension_paths = tk.StringVar(value="")
+        self.manual_navigation = tk.BooleanVar(value=False)
+        self.manual_wait_seconds = tk.IntVar(value=60)
 
         rows = [
             ("URL", self.url, 72),
@@ -85,6 +91,13 @@ class AuthorizedTester(tk.Tk):
         ttk.Spinbox(form, from_=0, to=8, increment=.1, textvariable=self.jitter, width=10).grid(row=6, column=1, sticky="w")
         ttk.Checkbutton(form, text="显示浏览器窗口", variable=self.headless, onvalue=False, offvalue=True).grid(row=6, column=2, sticky="w")
         ttk.Checkbutton(form, text="我确认该 URL 属于本地/自有/已授权测试范围", variable=self.authorized).grid(row=6, column=3, columnspan=3, sticky="w")
+        ttk.Label(form, text="Profile目录").grid(row=7, column=0, sticky="w")
+        ttk.Entry(form, textvariable=self.user_data_dir, width=34).grid(row=7, column=1, columnspan=2, sticky="we", pady=4)
+        ttk.Label(form, text="扩展目录(;分隔)").grid(row=7, column=3, sticky="w")
+        ttk.Entry(form, textvariable=self.extension_paths, width=34).grid(row=7, column=4, columnspan=2, sticky="we", pady=4)
+        ttk.Checkbutton(form, text="手动深层页面模式", variable=self.manual_navigation).grid(row=8, column=1, sticky="w")
+        ttk.Label(form, text="等待秒").grid(row=8, column=2, sticky="e")
+        ttk.Spinbox(form, from_=0, to=600, textvariable=self.manual_wait_seconds, width=8).grid(row=8, column=3, sticky="w")
 
         btns = ttk.Frame(main)
         btns.pack(fill=tk.X, pady=10)
@@ -124,6 +137,12 @@ class AuthorizedTester(tk.Tk):
             "steps": self.steps.get(),
             "jitter": self.jitter.get(),
             "modes": ["normal", "careful", "fast", "hesitant"],
+            "browser": {
+                "user_data_dir": self.user_data_dir.get().strip(),
+                "extension_paths": [x.strip() for x in self.extension_paths.get().split(";") if x.strip()],
+                "manual_navigation": self.manual_navigation.get(),
+                "manual_wait_ms": self.manual_wait_seconds.get() * 1000,
+            },
             "authorized_only": True,
         }
 
@@ -141,6 +160,12 @@ class AuthorizedTester(tk.Tk):
         self.duration.set(int(data.get("duration_ms", 900)))
         self.steps.set(int(data.get("steps", 90)))
         self.jitter.set(float(data.get("jitter", 1.6)))
+        browser = data.get("browser", {}) if isinstance(data.get("browser", {}), dict) else {}
+        self.user_data_dir.set(browser.get("user_data_dir", ".liuhen/profiles/default"))
+        ext = browser.get("extension_paths", [])
+        self.extension_paths.set(";".join(ext) if isinstance(ext, list) else str(ext or ""))
+        self.manual_navigation.set(bool(browser.get("manual_navigation", False)))
+        self.manual_wait_seconds.set(int(browser.get("manual_wait_ms", 60000)) // 1000)
         self.authorized.set(bool(data.get("authorized_only", False)))
 
     def save_profile(self):
@@ -162,6 +187,8 @@ class AuthorizedTester(tk.Tk):
         if not self.url.get().strip() or not self.slider.get().strip() or not self.knob.get().strip():
             messagebox.showwarning("参数不足", "URL、滑块轨道 selector、滑块按钮 selector 必填。")
             return
+        if self.manual_navigation.get():
+            messagebox.showinfo("手动深层页面模式", f"浏览器打开后，请在 {self.manual_wait_seconds.get()} 秒内手动完成登录、跳转或进入授权深层页面。等待结束后会从当前页面继续测试。")
         self.clear()
         threading.Thread(target=self._run, daemon=True).start()
 
@@ -171,12 +198,24 @@ class AuthorizedTester(tk.Tk):
         self._status("测试运行中，请等待...")
         try:
             with sync_playwright() as p:
-                browser = p.chromium.launch(headless=self.headless.get())
-                for mode in modes:
-                    result = self._attempt(browser, profile, mode)
-                    self.results.append(result)
-                    self.after(0, lambda r=result: self.table.insert("", tk.END, values=(r.strategy, "通过" if r.ok else "失败", r.elapsed_ms, r.reason)))
-                browser.close()
+                context, browser = launch_browser_context(p, profile, headless=self.headless.get(), viewport={"width": 1200, "height": 800})
+                try:
+                    manual_page = None
+                    if manual_navigation_enabled(profile):
+                        manual_page = context.pages[-1] if context.pages else context.new_page()
+                        manual_page.goto(_resolve_url(profile["url"]), wait_until="domcontentloaded", timeout=20000)
+                        wait = manual_wait_ms(profile)
+                        self._status(f"手动深层页面模式：请在 {wait // 1000} 秒内进入授权目标页面...")
+                        if wait > 0:
+                            manual_page.wait_for_timeout(wait)
+                        if context.pages:
+                            manual_page = context.pages[-1]
+                    for mode in modes:
+                        result = self._attempt(context, profile, mode, manual_page)
+                        self.results.append(result)
+                        self.after(0, lambda r=result: self.table.insert("", tk.END, values=(r.strategy, "通过" if r.ok else "失败", r.elapsed_ms, r.reason)))
+                finally:
+                    close_browser_context(context, browser)
             passed = sum(1 for r in self.results if r.ok)
             total = len(self.results)
             self._status(f"测试完成：通过 {passed}/{total}")
@@ -185,12 +224,13 @@ class AuthorizedTester(tk.Tk):
             self._status(f"运行失败：{e}")
             self.after(0, lambda: messagebox.showerror("运行失败", str(e)))
 
-    def _attempt(self, browser, profile, mode: str) -> Attempt:
-        page = browser.new_page(viewport={"width": 1200, "height": 800})
+    def _attempt(self, context, profile, mode: str, manual_page=None) -> Attempt:
+        page = manual_page or context.new_page()
         t0 = time.perf_counter()
         try:
             url = _resolve_url(profile["url"])
-            page.goto(url, wait_until="domcontentloaded", timeout=20000)
+            if manual_page is None:
+                page.goto(url, wait_until="domcontentloaded", timeout=20000)
             page.wait_for_selector(profile["slider_selector"], timeout=10000)
             page.wait_for_selector(profile["knob_selector"], timeout=10000)
             slider = page.locator(profile["slider_selector"]).bounding_box()
@@ -220,7 +260,8 @@ class AuthorizedTester(tk.Tk):
         except Exception as e:
             return Attempt(mode, False, str(e), round((time.perf_counter() - t0) * 1000, 2), profile.get("url", ""))
         finally:
-            page.close()
+            if manual_page is None:
+                page.close()
 
     def _status(self, text):
         self.after(0, lambda: self.status.config(text=text))

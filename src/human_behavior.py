@@ -11,8 +11,10 @@ from typing import Any
 from playwright.sync_api import sync_playwright
 
 try:
+    from browser_context import close_browser_context, launch_browser_context, manual_navigation_enabled, manual_wait_ms
     from trajectory import generate_trajectory, Point
 except Exception:
+    from src.browser_context import close_browser_context, launch_browser_context, manual_navigation_enabled, manual_wait_ms
     from src.trajectory import generate_trajectory, Point
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -109,12 +111,22 @@ def run_session(profile_path: str, headless: bool = False) -> dict[str, Any]:
     actions = profile.get("actions", [])
     logs: list[ActionLog] = []
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=headless)
-        page = browser.new_page(viewport=profile.get("viewport", {"width": 1280, "height": 850}))
+        viewport = profile.get("viewport", {"width": 1280, "height": 850})
+        context, browser = launch_browser_context(p, profile, headless=headless, viewport=viewport)
+        page = context.pages[-1] if context.pages else context.new_page()
         t0 = time.perf_counter()
         try:
-            page.goto(url, wait_until="domcontentloaded", timeout=20000)
-            logs.append(ActionLog("goto", True, round((time.perf_counter() - t0) * 1000, 2), url))
+            if manual_navigation_enabled(profile):
+                page.goto(url, wait_until="domcontentloaded", timeout=20000)
+                wait_ms = manual_wait_ms(profile)
+                if wait_ms > 0:
+                    page.wait_for_timeout(wait_ms)
+                if context.pages:
+                    page = context.pages[-1]
+                logs.append(ActionLog("manual_navigation", True, round((time.perf_counter() - t0) * 1000, 2), page.url))
+            else:
+                page.goto(url, wait_until="domcontentloaded", timeout=20000)
+                logs.append(ActionLog("goto", True, round((time.perf_counter() - t0) * 1000, 2), url))
             for action in actions:
                 at = time.perf_counter()
                 typ = action.get("type")
@@ -139,7 +151,7 @@ def run_session(profile_path: str, headless: bool = False) -> dict[str, Any]:
                     if action.get("required", True):
                         break
         finally:
-            browser.close()
+            close_browser_context(context, browser)
     return {
         "profile": profile.get("name", profile_path),
         "url": profile.get("url"),

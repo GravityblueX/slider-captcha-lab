@@ -6,3 +6,4 @@ dist/
 *.spec
 trajectory.csv
 _tmp_behavior_profile.json
+.liuhen/

@@ -70,6 +70,9 @@ authorized_gui_tester.py
 - 输入滑块按钮 selector；
 - 输入成功判断 selector；
 - 自动运行多种轨迹策略；
+- 支持持久浏览器 Profile，用于保留授权测试环境中的登录态和本地存储；
+- 支持加载本地 Chrome 扩展目录；
+- 支持手动深层页面模式：先手动登录/跳转到授权目标页面，再继续测试；
 - 表格展示通过/失败结果；
 - 弹窗显示测试摘要；
 - 导出 JSON 结果。
@@ -99,6 +102,9 @@ behavior_gui.py
 - 模拟点击；
 - 模拟逐字输入；
 - 等待元素出现；
+- 支持持久浏览器 Profile；
+- 支持加载本地 Chrome 扩展目录；
+- 支持手动深层页面模式，适合自有系统里入口较深、需要人工登录或人工导航的页面；
 - 导入/导出 Profile；
 - 导出 HTML 测试报告。
 
@@ -268,6 +274,31 @@ python liuhen.py
 
 ---
 
+## 浏览器 Profile 与扩展
+
+授权滑块测试和行为会话测试都支持在 Profile JSON 中配置浏览器上下文：
+
+```json
+{
+  "browser": {
+    "user_data_dir": ".liuhen/profiles/default",
+    "extension_paths": ["C:/path/to/your-extension"],
+    "manual_navigation": true,
+    "manual_wait_ms": 60000
+  }
+}
+```
+
+说明：
+
+- `user_data_dir` 会创建 Chromium persistent context，用于保留自有/授权测试环境中的登录态、Cookie 和 localStorage；
+- `extension_paths` 用于加载本地未打包 Chrome 扩展目录，多个扩展可用数组或 GUI 中的分号分隔；
+- `manual_navigation` 开启后，浏览器会先打开起始 URL，并等待指定时间；你可以在这段时间内手动完成登录、进入深层页面或切换标签页；
+- 等待结束后，工具会从当前页面继续执行动作链或滑块测试；
+- 这些能力仅用于本地、自有或明确授权测试，不用于绕过第三方网站验证码、风控、反爬虫或访问控制。
+
+---
+
 ## 打包 EXE
 
 Windows 下可以运行：
@@ -325,6 +356,7 @@ slider-captcha-lab/
 ├─ src/
 │  ├─ trajectory.py             # 轨迹生成引擎
 │  ├─ analyzer.py               # 轨迹分析
+│  ├─ browser_context.py        # 持久Profile与扩展上下文
 │  ├─ recorder.py               # 鼠标轨迹记录
 │  ├─ authorized_page_tester.py # 授权页面测试命令行工具
 │  ├─ human_behavior.py         # 人类行为会话模拟

@@ -23,6 +23,7 @@ REQUIRED_FILES = [
     "demo/event_diagnostics.js",
     "src/trajectory.py",
     "src/analyzer.py",
+    "src/browser_context.py",
     "src/human_behavior.py",
     "src/risk_analyzer.py",
     "src/network_diagnostics.py",
