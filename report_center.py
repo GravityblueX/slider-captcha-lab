@@ -64,6 +64,10 @@ class ReportCenter(tk.Tk):
             return '授权滑块测试', f"总数: {s.get('total','-')} 通过: {s.get('passed','-')} 失败: {s.get('failed','-')}"
         if 'modules' in data and 'playwright_chromium' in data:
             return '环境体检', f"评分: {data.get('score','-')} 结论: {data.get('verdict','-')}"
+        if data.get('report_type') == 'cdp_diagnostics':
+            page = data.get('page', {})
+            cdp = data.get('cdp', {})
+            return 'CDP授权诊断', f"frames: {page.get('frame_count','-')} targets: {cdp.get('target_count','-')}"
         if 'score' in data and 'verdict' in data:
             return '单项评分', f"评分: {data.get('score')} 结论: {data.get('verdict')}"
         return '未知 JSON', '已导入，无法自动识别摘要'

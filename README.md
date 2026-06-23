@@ -187,7 +187,7 @@ report_center.py
 
 功能：
 
-- 导入行为会话、授权滑块测试、风险分析、环境体检等 JSON；
+- 导入行为会话、授权滑块测试、风险分析、环境体检、CDP 授权诊断等 JSON；
 - 自动识别报告类型与摘要；
 - 生成统一 HTML 报告；
 - 对报告内容进行 HTML 转义，避免测试数据中的特殊字符破坏报告结构。
@@ -209,6 +209,30 @@ src/network_diagnostics.py
 - ALPN / HTTP2 协议观察；
 - 证书信息；
 - 公网 IP 上下文。
+
+---
+
+### 8. CDP 授权诊断
+
+文件：
+
+```text
+src/cdp_diagnostics.py
+```
+
+功能：
+
+- 连接本地、自有或明确授权页面的 Chromium CDP session；
+- 导出浏览器版本、target 列表、frame 摘要、运行时环境字段；
+- 仅记录 Cookie 名称与数量，不记录 Cookie 值；
+- 输出 JSON，可导入综合报告中心；
+- 不实现验证码自动求解，不用于真实网站风控绕过。
+
+运行：
+
+```bash
+python src/cdp_diagnostics.py examples/authorized_deep_page_profile.json --headless --out cdp-diagnostics-result.json
+```
 
 ---
 
@@ -272,8 +296,9 @@ python liuhen.py
 2. 用「行为会话测试」编排真实人类网页操作；
 3. 用「授权滑块测试」测试自有或授权页面；
 4. 用「风险分析中心」分析事件链和环境自然度；
-5. 用「综合报告中心」汇总 JSON 结果并导出 HTML 留档；
-6. 导出 JSON / HTML / PNG / CSV 留档。
+5. 用 `src/cdp_diagnostics.py` 对本地/自有/授权页面做 CDP 会话诊断；
+6. 用「综合报告中心」汇总 JSON 结果并导出 HTML 留档；
+7. 导出 JSON / HTML / PNG / CSV 留档。
 ```
 
 ---
@@ -379,6 +404,14 @@ python scripts/regression_check.py
 
 它会使用 `examples/authorized_deep_page_profile.json` 跑本地授权滑块 demo，并验证页面结构探测能导出 frame 与候选控件。
 
+CDP 授权诊断检查：
+
+```bash
+python src/cdp_diagnostics.py examples/authorized_deep_page_profile.json --headless --out cdp-diagnostics-result.json
+```
+
+它会导出授权页面的 CDP/session 诊断 JSON，可导入综合报告中心。
+
 ---
 
 ## 项目结构
@@ -410,11 +443,14 @@ slider-captcha-lab/
 │  ├─ recorder.py               # 鼠标轨迹记录
 │  ├─ authorized_page_tester.py # 授权页面测试命令行工具
 │  ├─ human_behavior.py         # 人类行为会话模拟
+│  ├─ cdp_diagnostics.py        # CDP 授权会话诊断
 │  ├─ network_diagnostics.py    # 网络诊断
 │  └─ risk_analyzer.py          # 环境与事件风险分析
 └─ docs/
    ├─ research-notes.md
-   └─ fingerprint-defense-matrix.md
+   ├─ fingerprint-defense-matrix.md
+   ├─ cdp-authorized-diagnostics.md
+   └─ lux-net-dev-reference.md
 ```
 
 ---

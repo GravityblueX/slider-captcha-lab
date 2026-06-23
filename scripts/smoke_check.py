@@ -26,10 +26,13 @@ REQUIRED_FILES = [
     "src/browser_context.py",
     "src/profile_utils.py",
     "src/page_probe.py",
+    "src/cdp_diagnostics.py",
     "src/page_targets.py",
     "src/human_behavior.py",
     "src/risk_analyzer.py",
     "src/network_diagnostics.py",
+    "docs/cdp-authorized-diagnostics.md",
+    "docs/lux-net-dev-reference.md",
 ]
 
 OPTIONAL_MODULES = ["matplotlib", "playwright", "pandas", "PyInstaller"]

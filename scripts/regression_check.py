@@ -9,6 +9,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from src.authorized_page_tester import run_profile
+from src.cdp_diagnostics import run_cdp_diagnostics
 from src.page_probe import probe_profile
 
 PROFILE = ROOT / "examples" / "authorized_deep_page_profile.json"
@@ -27,10 +28,20 @@ def main() -> int:
         print(json.dumps({"ok": False, "stage": "page_probe", "result": probe}, ensure_ascii=False, indent=2))
         return 1
 
+    cdp = run_cdp_diagnostics(str(PROFILE), headless=True)
+    if cdp.get("report_type") != "cdp_diagnostics" or cdp.get("page", {}).get("frame_count", 0) < 1:
+        print(json.dumps({"ok": False, "stage": "cdp_diagnostics", "result": cdp}, ensure_ascii=False, indent=2))
+        return 1
+
     print(json.dumps({
         "ok": True,
         "authorized_profile": summary,
         "page_probe": probe_summary,
+        "cdp_diagnostics": {
+            "targets": cdp.get("cdp", {}).get("target_count"),
+            "frames": cdp.get("page", {}).get("frame_count"),
+            "scope": cdp.get("scope"),
+        },
     }, ensure_ascii=False, indent=2))
     return 0
 

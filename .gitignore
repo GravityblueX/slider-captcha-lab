@@ -8,4 +8,5 @@ trajectory.csv
 _tmp_behavior_profile.json
 _tmp_authorized_probe_profile.json
 page-probe-result.json
+cdp-diagnostics-result.json
 .liuhen/
