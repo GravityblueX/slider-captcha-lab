@@ -368,8 +368,10 @@ python src/page_probe.py examples/authorized_deep_page_profile.json --headless -
 
 - 当前页面 URL 和标题；
 - 所有 frame 的 `index / name / url`；
+- 每个 frame 的 `depth / parent_index / frame_chain / target_hint`；
 - 常见按钮、输入框、可拖动元素、slider/captcha/drag 命名元素；
-- 每个候选元素的建议 selector、文本、可见性和位置。
+- 每个候选元素的建议 selector、文本、可见性、位置、评分和命中原因；
+- `summary.best_candidates`，用于人工复核最值得尝试的授权 selector 线索。
 
 GUI 中的「授权滑块测试」也提供「探测页面结构」按钮，结果会保存为 `page-probe-result.json`。
 
@@ -380,6 +382,8 @@ python src/page_probe.py examples/attached_chrome_profile.json --out page-probe-
 ```
 
 该模式会在 JSON 中记录 `browser_session.attached_to_existing_chrome`，方便在综合报告中心区分真实 Chrome 会话和托管 Chromium 会话。
+
+更完整的深层页面映射说明见 [docs/deep-page-map.md](./docs/deep-page-map.md)。
 
 ---
 

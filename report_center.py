@@ -74,7 +74,8 @@ class ReportCenter(tk.Tk):
             summary = data.get('summary', {})
             session = data.get('browser_session', {})
             mode = '真实Chrome' if session.get('attached_to_existing_chrome') else '托管Chromium'
-            return '页面结构探测', f"{mode} frames: {summary.get('frame_count','-')} candidates: {summary.get('visible_candidate_count','-')}"
+            best_count = len(summary.get('best_candidates', []) or [])
+            return '页面结构探测', f"{mode} frames: {summary.get('frame_count','-')} candidates: {summary.get('visible_candidate_count','-')} best: {best_count}"
         if 'score' in data and 'verdict' in data:
             return '单项评分', f"评分: {data.get('score')} 结论: {data.get('verdict')}"
         return '未知 JSON', '已导入，无法自动识别摘要'
@@ -114,11 +115,13 @@ class ReportCenter(tk.Tk):
         cards = []
         for f in self.files:
             data = escape(json.dumps(f['data'], ensure_ascii=False, indent=2))
+            insight = self.render_insight(f['data'])
             cards.append(f"""
 <section class='card'>
   <h2>{escape(f['type'])}</h2>
   <p><b>文件：</b>{escape(f['path'])}</p>
   <p><b>摘要：</b>{escape(f['summary'])}</p>
+  {insight}
   <details><summary>查看原始 JSON</summary><pre>{data}</pre></details>
 </section>
 """)
@@ -130,6 +133,25 @@ class ReportCenter(tk.Tk):
 <h2>结论说明</h2>
 <p>请结合授权范围、测试目标、页面流程、账号/IP/Session/Token 等服务端因素综合判断。本报告不代表可通过任何真实网站风控。</p>
 </body></html>"""
+
+    def render_insight(self, data):
+        if 'frames' in data and data.get('summary', {}).get('best_candidates'):
+            rows = []
+            for item in data.get('summary', {}).get('best_candidates', [])[:8]:
+                rows.append(
+                    "<tr>"
+                    f"<td>{escape(str(item.get('frame_index', '-')))}</td>"
+                    f"<td>{escape(str(item.get('score', '-')))}</td>"
+                    f"<td><code>{escape(str(item.get('selector', '')))}</code></td>"
+                    f"<td>{escape(', '.join(item.get('reasons', []) or []))}</td>"
+                    "</tr>"
+                )
+            return (
+                "<h3>候选控件线索</h3>"
+                "<table><thead><tr><th>Frame</th><th>Score</th><th>Selector</th><th>Reasons</th></tr></thead>"
+                f"<tbody>{''.join(rows)}</tbody></table>"
+            )
+        return ''
 
 if __name__ == '__main__':
     ReportCenter().mainloop()

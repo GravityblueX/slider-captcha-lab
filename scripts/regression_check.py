@@ -27,6 +27,9 @@ def main() -> int:
     if probe_summary.get("frame_count", 0) < 1 or probe_summary.get("visible_candidate_count", 0) < 1:
         print(json.dumps({"ok": False, "stage": "page_probe", "result": probe}, ensure_ascii=False, indent=2))
         return 1
+    if not probe_summary.get("best_candidates"):
+        print(json.dumps({"ok": False, "stage": "page_probe_best_candidates", "result": probe}, ensure_ascii=False, indent=2))
+        return 1
 
     cdp = run_cdp_diagnostics(str(PROFILE), headless=True)
     if cdp.get("report_type") != "cdp_diagnostics" or cdp.get("page", {}).get("frame_count", 0) < 1:
