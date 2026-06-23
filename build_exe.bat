@@ -20,8 +20,10 @@ pyinstaller --clean --onefile --windowed --name LiuHen ^
   --hidden-import src.trajectory ^
   --hidden-import src.analyzer ^
   --hidden-import src.browser_context ^
+  --hidden-import src.chrome_session ^
   --hidden-import src.profile_utils ^
   --hidden-import src.page_probe ^
+  --hidden-import src.cdp_diagnostics ^
   --hidden-import src.page_targets ^
   --hidden-import src.human_behavior ^
   --hidden-import src.risk_analyzer ^

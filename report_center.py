@@ -67,7 +67,14 @@ class ReportCenter(tk.Tk):
         if data.get('report_type') == 'cdp_diagnostics':
             page = data.get('page', {})
             cdp = data.get('cdp', {})
-            return 'CDP授权诊断', f"frames: {page.get('frame_count','-')} targets: {cdp.get('target_count','-')}"
+            session = data.get('browser_session', {})
+            mode = '真实Chrome' if session.get('attached_to_existing_chrome') else '托管Chromium'
+            return 'CDP授权诊断', f"{mode} frames: {page.get('frame_count','-')} targets: {cdp.get('target_count','-')}"
+        if 'frames' in data and data.get('browser_session') and data.get('scope'):
+            summary = data.get('summary', {})
+            session = data.get('browser_session', {})
+            mode = '真实Chrome' if session.get('attached_to_existing_chrome') else '托管Chromium'
+            return '页面结构探测', f"{mode} frames: {summary.get('frame_count','-')} candidates: {summary.get('visible_candidate_count','-')}"
         if 'score' in data and 'verdict' in data:
             return '单项评分', f"评分: {data.get('score')} 结论: {data.get('verdict')}"
         return '未知 JSON', '已导入，无法自动识别摘要'

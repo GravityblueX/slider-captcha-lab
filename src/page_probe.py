@@ -9,27 +9,19 @@ from typing import Any
 from playwright.sync_api import sync_playwright
 
 try:
-    from browser_context import close_browser_context, launch_browser_context, manual_navigation_enabled, manual_wait_ms
-    from profile_utils import load_profile, resolve_url
+    from chrome_session import close_chrome_session, open_chrome_session
+    from profile_utils import load_profile
 except Exception:
-    from src.browser_context import close_browser_context, launch_browser_context, manual_navigation_enabled, manual_wait_ms
-    from src.profile_utils import load_profile, resolve_url
+    from src.chrome_session import close_chrome_session, open_chrome_session
+    from src.profile_utils import load_profile
 
 
 def probe_profile(profile_path: str, headless: bool = False) -> dict[str, Any]:
     profile = load_profile(profile_path)
-    url = resolve_url(profile["url"])
     with sync_playwright() as p:
-        context, browser = launch_browser_context(p, profile, headless=headless, viewport=profile.get("viewport", {"width": 1280, "height": 850}))
+        session = open_chrome_session(p, profile, headless=headless, viewport=profile.get("viewport", {"width": 1280, "height": 850}))
         try:
-            page = context.pages[-1] if context.pages else context.new_page()
-            page.goto(url, wait_until="domcontentloaded", timeout=20000)
-            if manual_navigation_enabled(profile):
-                wait_ms = manual_wait_ms(profile)
-                if wait_ms > 0:
-                    page.wait_for_timeout(wait_ms)
-                if context.pages:
-                    page = context.pages[-1]
+            page = session.page
             frames = []
             for index, frame in enumerate(page.frames):
                 frames.append(_probe_frame(frame, index))
@@ -42,9 +34,14 @@ def probe_profile(profile_path: str, headless: bool = False) -> dict[str, Any]:
                 "summary": summary,
                 "frames": frames,
                 "scope": "local_owned_or_explicitly_authorized_pages_only",
+                "browser_session": {
+                    "attached_to_existing_chrome": session.attached,
+                    "endpoint": session.endpoint,
+                    "selected_by": session.selected_by,
+                },
             }
         finally:
-            close_browser_context(context, browser)
+            close_chrome_session(session)
 
 
 def _probe_frame(frame, index: int) -> dict[str, Any]:

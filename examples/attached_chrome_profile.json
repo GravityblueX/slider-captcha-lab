@@ -1,0 +1,23 @@
+{
+  "name": "attached-existing-chrome-authorized-example",
+  "url": "demo/index.html",
+  "browser": {
+    "connect_existing_chrome": true,
+    "cdp_endpoint": "http://127.0.0.1:9222",
+    "reuse_current_page": true,
+    "target_url_contains": "",
+    "target_title_contains": "",
+    "manual_navigation": false,
+    "manual_wait_ms": 60000,
+    "cdp": {
+      "enabled": true,
+      "endpoint": "http://127.0.0.1:9222",
+      "reuse_current_page": true,
+      "timeout_ms": 10000
+    }
+  },
+  "target": {
+    "frame_chain": []
+  },
+  "authorized_only": true
+}

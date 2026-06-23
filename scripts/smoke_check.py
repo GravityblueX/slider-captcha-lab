@@ -24,6 +24,7 @@ REQUIRED_FILES = [
     "src/trajectory.py",
     "src/analyzer.py",
     "src/browser_context.py",
+    "src/chrome_session.py",
     "src/profile_utils.py",
     "src/page_probe.py",
     "src/cdp_diagnostics.py",
@@ -33,6 +34,10 @@ REQUIRED_FILES = [
     "src/network_diagnostics.py",
     "docs/cdp-authorized-diagnostics.md",
     "docs/lux-net-dev-reference.md",
+    "docs/v0.4.0-release-notes.md",
+    "examples/attached_chrome_profile.json",
+    "scripts/start-authorized-chrome-cdp.ps1",
+    "scripts/cdp_attach_smoke.py",
 ]
 
 OPTIONAL_MODULES = ["matplotlib", "playwright", "pandas", "PyInstaller"]

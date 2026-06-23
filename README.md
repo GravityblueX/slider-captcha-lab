@@ -223,6 +223,7 @@ src/cdp_diagnostics.py
 功能：
 
 - 连接本地、自有或明确授权页面的 Chromium CDP session；
+- 可接入本机已启动的 Chrome 调试端口，复用授权测试会话、Cookie、扩展和已打开页面；
 - 导出浏览器版本、target 列表、frame 摘要、运行时环境字段；
 - 仅记录 Cookie 名称与数量，不记录 Cookie 值；
 - 输出 JSON，可导入综合报告中心；
@@ -232,6 +233,14 @@ src/cdp_diagnostics.py
 
 ```bash
 python src/cdp_diagnostics.py examples/authorized_deep_page_profile.json --headless --out cdp-diagnostics-result.json
+```
+
+接入已打开的授权 Chrome：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/start-authorized-chrome-cdp.ps1
+python src/page_probe.py examples/attached_chrome_profile.json --out page-probe-result.json
+python src/cdp_diagnostics.py examples/attached_chrome_profile.json --out cdp-diagnostics-result.json
 ```
 
 ---
@@ -330,6 +339,8 @@ python liuhen.py
 - `extension_paths` 用于加载本地未打包 Chrome 扩展目录，多个扩展可用数组或 GUI 中的分号分隔；
 - `manual_navigation` 开启后，浏览器会先打开起始 URL，并等待指定时间；你可以在这段时间内手动完成登录、进入深层页面或切换标签页；
 - 等待结束后，工具会从当前页面继续执行动作链或滑块测试；
+- `connect_existing_chrome` 会连接本机 Chrome CDP 调试端口，适合复用已经手动进入的授权测试页面；
+- `reuse_current_page` 为 `true` 时，页面探测与 CDP 诊断会复用调试会话中的当前页面，不主动跳转；
 - `target.frame_chain` 用于多层 iframe。每一层可使用 `selector`、`url_contains` 或 `name`；
 - 滑块测试支持多个备用 selector，例如：
 
@@ -361,6 +372,14 @@ python src/page_probe.py examples/authorized_deep_page_profile.json --headless -
 - 每个候选元素的建议 selector、文本、可见性和位置。
 
 GUI 中的「授权滑块测试」也提供「探测页面结构」按钮，结果会保存为 `page-probe-result.json`。
+
+如果目标页面已经在本机授权 Chrome 中打开，可以使用：
+
+```bash
+python src/page_probe.py examples/attached_chrome_profile.json --out page-probe-result.json
+```
+
+该模式会在 JSON 中记录 `browser_session.attached_to_existing_chrome`，方便在综合报告中心区分真实 Chrome 会话和托管 Chromium 会话。
 
 ---
 
@@ -412,6 +431,14 @@ python src/cdp_diagnostics.py examples/authorized_deep_page_profile.json --headl
 
 它会导出授权页面的 CDP/session 诊断 JSON，可导入综合报告中心。
 
+CDP attach 链路检查：
+
+```bash
+python scripts/cdp_attach_smoke.py
+```
+
+它会临时启动一个带调试端口的 Playwright Chromium，再通过 `src/chrome_session.py` 反连验证，不会触碰日常 Chrome 配置。
+
 ---
 
 ## 项目结构
@@ -438,6 +465,7 @@ slider-captcha-lab/
 │  ├─ trajectory.py             # 轨迹生成引擎
 │  ├─ analyzer.py               # 轨迹分析
 │  ├─ browser_context.py        # 持久Profile与扩展上下文
+│  ├─ chrome_session.py         # 已有Chrome CDP会话接入
 │  ├─ page_probe.py             # 页面结构探测
 │  ├─ page_targets.py           # frame与备用selector解析
 │  ├─ recorder.py               # 鼠标轨迹记录

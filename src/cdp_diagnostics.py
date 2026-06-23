@@ -9,34 +9,27 @@ from typing import Any
 from playwright.sync_api import sync_playwright
 
 try:
-    from browser_context import close_browser_context, launch_browser_context, manual_navigation_enabled, manual_wait_ms
-    from profile_utils import load_profile, resolve_url
+    from chrome_session import close_chrome_session, open_chrome_session
+    from profile_utils import load_profile
 except Exception:
-    from src.browser_context import close_browser_context, launch_browser_context, manual_navigation_enabled, manual_wait_ms
-    from src.profile_utils import load_profile, resolve_url
+    from src.chrome_session import close_chrome_session, open_chrome_session
+    from src.profile_utils import load_profile
 
 
 def run_cdp_diagnostics(profile_path: str, headless: bool = False) -> dict[str, Any]:
     """Collect CDP/session diagnostics for local, owned, or explicitly authorized pages."""
     profile = load_profile(profile_path)
-    url = resolve_url(profile["url"])
 
     with sync_playwright() as p:
-        context, browser = launch_browser_context(
+        session_info = open_chrome_session(
             p,
             profile,
             headless=headless,
             viewport=profile.get("viewport", {"width": 1280, "height": 850}),
         )
         try:
-            page = context.pages[-1] if context.pages else context.new_page()
-            page.goto(url, wait_until="domcontentloaded", timeout=20000)
-            if manual_navigation_enabled(profile):
-                wait_ms = manual_wait_ms(profile)
-                if wait_ms > 0:
-                    page.wait_for_timeout(wait_ms)
-                if context.pages:
-                    page = context.pages[-1]
+            context = session_info.context
+            page = session_info.page
 
             session = context.new_cdp_session(page)
             browser_version = _safe_cdp(session, "Browser.getVersion")
@@ -106,6 +99,11 @@ def run_cdp_diagnostics(profile_path: str, headless: bool = False) -> dict[str, 
                     "bypass_or_evasion": False,
                     "raw_cookie_values_recorded": False,
                 },
+                "browser_session": {
+                    "attached_to_existing_chrome": session_info.attached,
+                    "endpoint": session_info.endpoint,
+                    "selected_by": session_info.selected_by,
+                },
                 "profile": profile.get("name", profile_path),
                 "created_at_ms": round(time.time() * 1000),
                 "page": {
@@ -128,7 +126,7 @@ def run_cdp_diagnostics(profile_path: str, headless: bool = False) -> dict[str, 
                 "recommendations": _recommendations(runtime, cookies, frames),
             }
         finally:
-            close_browser_context(context, browser)
+            close_chrome_session(session_info)
 
 
 def _safe_cdp(session, method: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
