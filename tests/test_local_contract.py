@@ -7,6 +7,7 @@ from pathlib import Path
 from scripts.evidence_pack import build_evidence_pack, render_markdown
 from scripts.evidence_manifest import build_manifest
 from scripts.profile_policy import build_report, check_profile
+from scripts.safety_contract import build_contract
 from scripts.target_surface_registry import build_registry
 from src.analyzer import analyze
 from src.trajectory import generate_trajectory
@@ -104,6 +105,16 @@ class LocalContractTests(unittest.TestCase):
         self.assertGreaterEqual(len(manifest["items"]), 9)
         self.assertEqual(manifest["failures"], [])
         self.assertTrue(any("Playwright Trace Viewer" in item for item in manifest["reference_patterns"]))
+
+    def test_safety_contract_rejects_bypass_and_cookie_value_drift(self) -> None:
+        contract = build_contract()
+
+        self.assertTrue(contract["ok"])
+        self.assertEqual(contract["scope"], "local_owned_or_explicitly_authorized_pages_only")
+        self.assertEqual(contract["failures"], [])
+        gate_names = {item["name"] for item in contract["gates"]}
+        self.assertIn("evidence pack does not solve CAPTCHA", gate_names)
+        self.assertIn("no cookie values in generated evidence", gate_names)
 
 
 if __name__ == "__main__":

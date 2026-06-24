@@ -1,0 +1,59 @@
+{
+  "report_type": "slider_safety_contract",
+  "generated_at": "2026-06-24T03:25:42.020463+00:00",
+  "scope": "local_owned_or_explicitly_authorized_pages_only",
+  "ok": true,
+  "gates": [
+    {
+      "name": "README states non-bypass boundary",
+      "ok": true,
+      "detail": "README.md + DISCLAIMER.md"
+    },
+    {
+      "name": "profile policy ok",
+      "ok": true,
+      "detail": "True"
+    },
+    {
+      "name": "target surface registry ok",
+      "ok": true,
+      "detail": "True"
+    },
+    {
+      "name": "evidence manifest ok",
+      "ok": true,
+      "detail": "True"
+    },
+    {
+      "name": "evidence pack does not solve CAPTCHA",
+      "ok": true,
+      "detail": "True"
+    },
+    {
+      "name": "all default targets local",
+      "ok": true,
+      "detail": "2 profile(s)"
+    },
+    {
+      "name": "all profiles authorized only",
+      "ok": true,
+      "detail": "2 profile(s)"
+    },
+    {
+      "name": "all CDP endpoints local",
+      "ok": true,
+      "detail": "2 profile(s)"
+    },
+    {
+      "name": "no cookie values in generated evidence",
+      "ok": true,
+      "detail": "cookie keys absent"
+    }
+  ],
+  "failures": [],
+  "reference_patterns": [
+    "Authorization boundary as an executable local contract",
+    "Browser diagnostics evidence must avoid cookie values",
+    "Default targets must remain local demo, owned, or explicitly authorized"
+  ]
+}
