@@ -1,0 +1,74 @@
+{
+  "report_type": "authorized_browser_evidence_pack",
+  "generated_at": "2026-06-24T01:39:12.786216+00:00",
+  "scope": "local_owned_or_explicitly_authorized_pages_only",
+  "profile": {
+    "path": "C:\\Users\\123\\Documents\\Codex\\2026-06-18\\new-chat-5\\work\\slider-captcha-lab\\examples\\authorized_deep_page_profile.json",
+    "name": "local-authorized-deep-page-example",
+    "url": "demo/index.html",
+    "authorized_only": true,
+    "manual_navigation": false,
+    "connect_existing_chrome": false
+  },
+  "authorized_profile": {
+    "passed": 2,
+    "failed": 0,
+    "total": 2
+  },
+  "page_probe": {
+    "frame_count": 1,
+    "deep_frame_count": 0,
+    "candidate_count": 2,
+    "visible_candidate_count": 2,
+    "best_candidates": [
+      {
+        "selector": "#knob",
+        "frame_index": 0,
+        "frame_depth": 0,
+        "score": 89,
+        "reasons": [
+          "visible",
+          "slider_or_drag_named",
+          "button_like",
+          "knob_shaped",
+          "has_label"
+        ],
+        "box": {
+          "x": 284,
+          "y": 394,
+          "width": 48,
+          "height": 48
+        }
+      },
+      {
+        "selector": "#slider",
+        "frame_index": 0,
+        "frame_depth": 0,
+        "score": 79,
+        "reasons": [
+          "visible",
+          "slider_or_drag_named",
+          "track_shaped",
+          "has_label"
+        ],
+        "box": {
+          "x": 280,
+          "y": 390,
+          "width": 720,
+          "height": 56
+        }
+      }
+    ]
+  },
+  "cdp_diagnostics": {
+    "target_count": 1,
+    "frame_count": 1,
+    "scope": "local_owned_or_explicitly_authorized_pages_only"
+  },
+  "safety": {
+    "no_third_party_defaults": true,
+    "no_cookie_values_recorded": true,
+    "does_not_solve_captcha": true
+  },
+  "ok": true
+}

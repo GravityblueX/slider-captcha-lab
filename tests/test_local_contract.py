@@ -4,6 +4,7 @@ import json
 import unittest
 from pathlib import Path
 
+from scripts.evidence_pack import build_evidence_pack, render_markdown
 from src.analyzer import analyze
 from src.trajectory import generate_trajectory
 
@@ -36,6 +37,35 @@ class LocalContractTests(unittest.TestCase):
 
         for required in ["明确授权", "请勿用于", "验证码", "风控"]:
             self.assertIn(required, combined)
+
+    def test_evidence_pack_preserves_authorized_boundary(self) -> None:
+        profile = {
+            "name": "local-authorized-deep-page-example",
+            "url": "demo/index.html",
+            "authorized_only": True,
+            "browser": {"manual_navigation": False, "connect_existing_chrome": False},
+        }
+        authorized_result = {"summary": {"passed": 2, "failed": 0, "total": 2}}
+        probe = {
+            "summary": {
+                "frame_count": 1,
+                "deep_frame_count": 0,
+                "candidate_count": 2,
+                "visible_candidate_count": 2,
+                "best_candidates": [
+                    {"selector": "#knob", "frame_index": 0, "frame_depth": 0, "score": 89, "reasons": ["visible"]}
+                ],
+            }
+        }
+        cdp = {"scope": "local_owned_or_explicitly_authorized_pages_only", "cdp": {"target_count": 1}, "page": {"frame_count": 1}}
+
+        pack = build_evidence_pack(ROOT / "examples" / "authorized_deep_page_profile.json", profile, authorized_result, probe, cdp)
+        markdown = render_markdown(pack)
+
+        self.assertTrue(pack["ok"])
+        self.assertTrue(pack["safety"]["does_not_solve_captcha"])
+        self.assertIn("Does not solve CAPTCHA", markdown)
+        self.assertIn("#knob", markdown)
 
 
 if __name__ == "__main__":

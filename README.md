@@ -451,6 +451,14 @@ python scripts/cdp_attach_smoke.py
 
 它会临时启动一个带调试端口的 Playwright Chromium，再通过 `src/chrome_session.py` 反连验证，不会触碰日常 Chrome 配置。
 
+授权证据包：
+
+```bash
+python scripts/evidence_pack.py
+```
+
+它会对默认本地授权 demo 生成 `docs/authorized-evidence-pack-local-demo.json` 和 `docs/authorized-evidence-pack-local-demo.md`，记录 profile 边界、frame 摘要、候选 selector 和 CDP 诊断摘要。该证据包只用于复核本地/自有/明确授权页面的诊断链路，不包含验证码求解、第三方绕过或 Cookie 值。
+
 ---
 
 ## 项目结构
