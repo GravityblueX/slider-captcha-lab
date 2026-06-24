@@ -5,6 +5,7 @@ import unittest
 from pathlib import Path
 
 from scripts.evidence_pack import build_evidence_pack, render_markdown
+from scripts.evidence_manifest import build_manifest
 from scripts.profile_policy import build_report, check_profile
 from src.analyzer import analyze
 from src.trajectory import generate_trajectory
@@ -83,6 +84,15 @@ class LocalContractTests(unittest.TestCase):
         messages = [issue.message for issue in issues]
         self.assertIn("authorized_only must be true", messages)
         self.assertTrue(any("default url must be local" in message for message in messages))
+
+    def test_evidence_manifest_keeps_authorized_artifacts_auditable(self) -> None:
+        manifest = build_manifest()
+
+        self.assertTrue(manifest["ok"])
+        self.assertEqual(manifest["scope"], "local_owned_or_explicitly_authorized_pages_only")
+        self.assertGreaterEqual(len(manifest["items"]), 6)
+        self.assertEqual(manifest["failures"], [])
+        self.assertTrue(any("Playwright Trace Viewer" in item for item in manifest["reference_patterns"]))
 
 
 if __name__ == "__main__":

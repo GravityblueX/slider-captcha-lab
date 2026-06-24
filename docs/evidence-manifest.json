@@ -1,0 +1,173 @@
+{
+  "report_type": "authorized_evidence_manifest",
+  "generated_at": "2026-06-24T02:32:47.104807+00:00",
+  "scope": "local_owned_or_explicitly_authorized_pages_only",
+  "ok": true,
+  "items": [
+    {
+      "path": "docs/authorized-evidence-pack-local-demo.json",
+      "kind": "json",
+      "purpose": "local demo browser evidence pack",
+      "exists": true,
+      "ok": true,
+      "checks": [
+        {
+          "name": "exists",
+          "ok": true,
+          "detail": "docs/authorized-evidence-pack-local-demo.json"
+        },
+        {
+          "name": "ok flag",
+          "ok": true,
+          "detail": "True"
+        },
+        {
+          "name": "authorized scope",
+          "ok": true,
+          "detail": "local_owned_or_explicitly_authorized_pages_only"
+        },
+        {
+          "name": "no cookie values",
+          "ok": true,
+          "detail": "no stored cookie values"
+        },
+        {
+          "name": "does not solve captcha",
+          "ok": true,
+          "detail": "True"
+        }
+      ]
+    },
+    {
+      "path": "docs/authorized-evidence-pack-local-demo.md",
+      "kind": "markdown",
+      "purpose": "human-readable authorized evidence summary",
+      "exists": true,
+      "ok": true,
+      "checks": [
+        {
+          "name": "exists",
+          "ok": true,
+          "detail": "docs/authorized-evidence-pack-local-demo.md"
+        },
+        {
+          "name": "not empty",
+          "ok": true,
+          "detail": "972 chars"
+        },
+        {
+          "name": "scope language",
+          "ok": true,
+          "detail": "authorized/local wording found"
+        }
+      ]
+    },
+    {
+      "path": "docs/profile-policy-report.json",
+      "kind": "json",
+      "purpose": "profile authorization and local-default policy",
+      "exists": true,
+      "ok": true,
+      "checks": [
+        {
+          "name": "exists",
+          "ok": true,
+          "detail": "docs/profile-policy-report.json"
+        },
+        {
+          "name": "ok flag",
+          "ok": true,
+          "detail": "True"
+        },
+        {
+          "name": "authorized scope",
+          "ok": true,
+          "detail": "local_owned_or_explicitly_authorized_pages_only"
+        },
+        {
+          "name": "no cookie values",
+          "ok": true,
+          "detail": "no stored cookie values"
+        }
+      ]
+    },
+    {
+      "path": "docs/profile-policy-report.md",
+      "kind": "markdown",
+      "purpose": "human-readable profile policy report",
+      "exists": true,
+      "ok": true,
+      "checks": [
+        {
+          "name": "exists",
+          "ok": true,
+          "detail": "docs/profile-policy-report.md"
+        },
+        {
+          "name": "not empty",
+          "ok": true,
+          "detail": "493 chars"
+        },
+        {
+          "name": "scope language",
+          "ok": true,
+          "detail": "authorized/local wording found"
+        }
+      ]
+    },
+    {
+      "path": "docs/cdp-authorized-diagnostics.md",
+      "kind": "markdown",
+      "purpose": "authorized Chrome DevTools Protocol diagnostics notes",
+      "exists": true,
+      "ok": true,
+      "checks": [
+        {
+          "name": "exists",
+          "ok": true,
+          "detail": "docs/cdp-authorized-diagnostics.md"
+        },
+        {
+          "name": "not empty",
+          "ok": true,
+          "detail": "1422 chars"
+        },
+        {
+          "name": "scope language",
+          "ok": true,
+          "detail": "authorized/local wording found"
+        }
+      ]
+    },
+    {
+      "path": "docs/deep-page-map.md",
+      "kind": "markdown",
+      "purpose": "deep page and frame mapping notes",
+      "exists": true,
+      "ok": true,
+      "checks": [
+        {
+          "name": "exists",
+          "ok": true,
+          "detail": "docs/deep-page-map.md"
+        },
+        {
+          "name": "not empty",
+          "ok": true,
+          "detail": "1094 chars"
+        },
+        {
+          "name": "scope language",
+          "ok": true,
+          "detail": "authorized/local wording found"
+        }
+      ]
+    }
+  ],
+  "failures": [],
+  "reference_patterns": [
+    "Playwright Trace Viewer: inspectable artifacts instead of opaque automation claims",
+    "Chrome DevTools Protocol Page domain: frame/page state is explicit evidence",
+    "OpenSSF Scorecard: local gates make project health reviewable"
+  ]
+}
