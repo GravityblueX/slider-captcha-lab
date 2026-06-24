@@ -1,0 +1,48 @@
+{
+  "report_type": "local_trace_artifacts",
+  "generated_at": "2026-06-24T02:44:34.524381+00:00",
+  "scope": "local_owned_or_explicitly_authorized_pages_only",
+  "profile": {
+    "path": "examples\\authorized_deep_page_profile.json",
+    "name": "local-authorized-deep-page-example",
+    "url": "demo/index.html",
+    "authorized_only": true
+  },
+  "page": {
+    "title": "Local Slider Interaction Lab",
+    "resolved_url": "file:///C:/Users/123/Documents/Codex/2026-06-18/new-chat-5/work/slider-captcha-lab/demo/index.html"
+  },
+  "artifacts": {
+    "screenshot": "docs\\trace-artifacts\\local-demo.png",
+    "screenshot_bytes": 23584
+  },
+  "selectors": [
+    {
+      "selector": "#knob",
+      "visible": true,
+      "box": {
+        "x": 284,
+        "y": 378.9375,
+        "width": 48,
+        "height": 48
+      }
+    },
+    {
+      "selector": "#slider",
+      "visible": true,
+      "box": {
+        "x": 280,
+        "y": 374.9375,
+        "width": 720,
+        "height": 56
+      }
+    }
+  ],
+  "safety": {
+    "does_not_solve_captcha": true,
+    "does_not_drag_or_submit": true,
+    "local_or_authorized_only": true
+  },
+  "ok": true,
+  "failures": []
+}

@@ -54,6 +54,22 @@ EVIDENCE_ITEMS = [
         "markdown",
         "deep page and frame mapping notes",
     ),
+    EvidenceItem(
+        "docs/trace-artifacts/local-demo-trace.json",
+        "json",
+        "local screenshot and selector visibility trace",
+        required_ok=True,
+    ),
+    EvidenceItem(
+        "docs/trace-artifacts/local-demo-trace.md",
+        "markdown",
+        "human-readable local trace artifact summary",
+    ),
+    EvidenceItem(
+        "docs/trace-artifacts/local-demo.png",
+        "image",
+        "local demo screenshot evidence",
+    ),
 ]
 
 
@@ -89,7 +105,9 @@ def inspect_item(item: EvidenceItem) -> dict[str, Any]:
         return result
 
     result["checks"].append({"name": "exists", "ok": True, "detail": item.path})
-    if item.kind == "json":
+    if item.kind == "image":
+        result["checks"].append({"name": "not empty", "ok": path.stat().st_size > 0, "detail": f"{path.stat().st_size} bytes"})
+    elif item.kind == "json":
         payload = load_json(path)
         if item.required_ok:
             result["checks"].append({"name": "ok flag", "ok": payload.get("ok") is True, "detail": str(payload.get("ok"))})
@@ -98,7 +116,7 @@ def inspect_item(item: EvidenceItem) -> dict[str, Any]:
         result["checks"].append({"name": "authorized scope", "ok": scope_ok, "detail": SCOPE})
         no_cookie_values = not contains_stored_cookie_value(payload)
         result["checks"].append({"name": "no cookie values", "ok": no_cookie_values, "detail": "no stored cookie values"})
-        if item.path.endswith("authorized-evidence-pack-local-demo.json"):
+        if item.path.endswith("authorized-evidence-pack-local-demo.json") or item.path.endswith("local-demo-trace.json"):
             no_solver = payload.get("safety", {}).get("does_not_solve_captcha") is True
             result["checks"].append({"name": "does not solve captcha", "ok": no_solver, "detail": str(no_solver)})
     else:

@@ -90,7 +90,7 @@ class LocalContractTests(unittest.TestCase):
 
         self.assertTrue(manifest["ok"])
         self.assertEqual(manifest["scope"], "local_owned_or_explicitly_authorized_pages_only")
-        self.assertGreaterEqual(len(manifest["items"]), 6)
+        self.assertGreaterEqual(len(manifest["items"]), 9)
         self.assertEqual(manifest["failures"], [])
         self.assertTrue(any("Playwright Trace Viewer" in item for item in manifest["reference_patterns"]))
 

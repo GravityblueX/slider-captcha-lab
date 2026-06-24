@@ -1,6 +1,6 @@
 {
   "report_type": "authorized_evidence_manifest",
-  "generated_at": "2026-06-24T02:32:47.104807+00:00",
+  "generated_at": "2026-06-24T02:44:34.818912+00:00",
   "scope": "local_owned_or_explicitly_authorized_pages_only",
   "ok": true,
   "items": [
@@ -160,6 +160,83 @@
           "name": "scope language",
           "ok": true,
           "detail": "authorized/local wording found"
+        }
+      ]
+    },
+    {
+      "path": "docs/trace-artifacts/local-demo-trace.json",
+      "kind": "json",
+      "purpose": "local screenshot and selector visibility trace",
+      "exists": true,
+      "ok": true,
+      "checks": [
+        {
+          "name": "exists",
+          "ok": true,
+          "detail": "docs/trace-artifacts/local-demo-trace.json"
+        },
+        {
+          "name": "ok flag",
+          "ok": true,
+          "detail": "True"
+        },
+        {
+          "name": "authorized scope",
+          "ok": true,
+          "detail": "local_owned_or_explicitly_authorized_pages_only"
+        },
+        {
+          "name": "no cookie values",
+          "ok": true,
+          "detail": "no stored cookie values"
+        },
+        {
+          "name": "does not solve captcha",
+          "ok": true,
+          "detail": "True"
+        }
+      ]
+    },
+    {
+      "path": "docs/trace-artifacts/local-demo-trace.md",
+      "kind": "markdown",
+      "purpose": "human-readable local trace artifact summary",
+      "exists": true,
+      "ok": true,
+      "checks": [
+        {
+          "name": "exists",
+          "ok": true,
+          "detail": "docs/trace-artifacts/local-demo-trace.md"
+        },
+        {
+          "name": "not empty",
+          "ok": true,
+          "detail": "642 chars"
+        },
+        {
+          "name": "scope language",
+          "ok": true,
+          "detail": "authorized/local wording found"
+        }
+      ]
+    },
+    {
+      "path": "docs/trace-artifacts/local-demo.png",
+      "kind": "image",
+      "purpose": "local demo screenshot evidence",
+      "exists": true,
+      "ok": true,
+      "checks": [
+        {
+          "name": "exists",
+          "ok": true,
+          "detail": "docs/trace-artifacts/local-demo.png"
+        },
+        {
+          "name": "not empty",
+          "ok": true,
+          "detail": "23584 bytes"
         }
       ]
     }

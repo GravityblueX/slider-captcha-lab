@@ -1,6 +1,6 @@
 # Authorized Evidence Manifest
 
-Generated: 2026-06-24T02:32:47.104807+00:00
+Generated: 2026-06-24T02:44:34.818912+00:00
 Scope: `local_owned_or_explicitly_authorized_pages_only`
 Status: `OK`
 
@@ -14,6 +14,9 @@ Status: `OK`
 | `docs/profile-policy-report.md` | OK | human-readable profile policy report |
 | `docs/cdp-authorized-diagnostics.md` | OK | authorized Chrome DevTools Protocol diagnostics notes |
 | `docs/deep-page-map.md` | OK | deep page and frame mapping notes |
+| `docs/trace-artifacts/local-demo-trace.json` | OK | local screenshot and selector visibility trace |
+| `docs/trace-artifacts/local-demo-trace.md` | OK | human-readable local trace artifact summary |
+| `docs/trace-artifacts/local-demo.png` | OK | local demo screenshot evidence |
 
 ## Reference Patterns
 
