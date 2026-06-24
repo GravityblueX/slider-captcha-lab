@@ -1,0 +1,9 @@
+[project]
+name = "slider-captcha-lab"
+version = "0.5.0"
+description = "Local and explicitly authorized browser behavior diagnostics lab."
+requires-python = ">=3.11"
+
+[tool.slider-captcha-lab]
+test-command = "python -m unittest discover -s tests"
+scope = "local-owned-or-explicitly-authorized-pages-only"

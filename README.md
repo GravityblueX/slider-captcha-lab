@@ -419,6 +419,14 @@ python scripts/smoke_check.py
 
 它会检查统一启动器中的入口文件、关键资源文件以及基础轨迹生成/分析是否可用。GitHub Actions 在打包 Windows EXE 前也会运行该检查。
 
+语言原生单元测试：
+
+```bash
+python -m unittest discover -s tests
+```
+
+它会验证轨迹分析、本地授权示例 Profile 和文档中的授权使用边界，避免项目偏离“本地 / 自有 / 明确授权”的范围。
+
 本地端到端回归检查：
 
 ```bash
