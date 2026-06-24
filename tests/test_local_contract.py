@@ -7,6 +7,7 @@ from pathlib import Path
 from scripts.evidence_pack import build_evidence_pack, render_markdown
 from scripts.evidence_manifest import build_manifest
 from scripts.dependency_inventory import build_inventory
+from scripts.authorized_boundary_audit import build_audit
 from scripts.profile_policy import build_report, check_profile
 from scripts.safety_contract import build_contract
 from scripts.target_surface_registry import build_registry
@@ -124,6 +125,16 @@ class LocalContractTests(unittest.TestCase):
         names = {dependency["name"].lower() for dependency in inventory["dependencies"]}
         self.assertIn("playwright", names)
         self.assertGreaterEqual(len(inventory["dependencies"]), 3)
+
+    def test_authorized_boundary_audit_keeps_default_targets_local(self) -> None:
+        audit = build_audit([ROOT / "examples"])
+
+        self.assertTrue(audit["ok"])
+        self.assertEqual(audit["scope"], "local_owned_or_explicitly_authorized_pages_only")
+        self.assertEqual(audit["failures"], [])
+        gate_names = {item["name"] for item in audit["gates"]}
+        self.assertIn("blocked real-site markers absent from profile defaults", gate_names)
+        self.assertEqual(audit["summary"]["blockedMarkerCount"], 0)
 
 
 if __name__ == "__main__":

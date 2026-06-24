@@ -1,0 +1,124 @@
+{
+  "report_type": "authorized_boundary_audit",
+  "generated_at": "2026-06-24T03:59:37.330819+00:00",
+  "scope": "local_owned_or_explicitly_authorized_pages_only",
+  "ok": true,
+  "summary": {
+    "profileCount": 2,
+    "cdpAttachProfileCount": 1,
+    "persistentProfileCount": 1,
+    "extensionProfileCount": 0,
+    "blockedMarkerCount": 0
+  },
+  "gates": [
+    {
+      "name": "scope recorded",
+      "ok": true,
+      "detail": "local_owned_or_explicitly_authorized_pages_only"
+    },
+    {
+      "name": "target surface registry ok",
+      "ok": true,
+      "detail": "True"
+    },
+    {
+      "name": "safety contract ok",
+      "ok": true,
+      "detail": "True"
+    },
+    {
+      "name": "all profiles authorized only",
+      "ok": true,
+      "detail": "2 profile(s)"
+    },
+    {
+      "name": "all default URLs local",
+      "ok": true,
+      "detail": "2 profile(s)"
+    },
+    {
+      "name": "all CDP endpoints local",
+      "ok": true,
+      "detail": "2 profile(s)"
+    },
+    {
+      "name": "CDP attach uses existing local browser only",
+      "ok": true,
+      "detail": "1 CDP profile(s)"
+    },
+    {
+      "name": "default profiles do not load extensions",
+      "ok": true,
+      "detail": "0 extension profile(s)"
+    },
+    {
+      "name": "blocked real-site markers absent from profile defaults",
+      "ok": true,
+      "detail": "none"
+    },
+    {
+      "name": "no cookie values in generated audit inputs",
+      "ok": true,
+      "detail": "profile registry storesCookieValues=false"
+    },
+    {
+      "name": "README and disclaimer keep non-bypass language",
+      "ok": true,
+      "detail": "README.md + DISCLAIMER.md"
+    }
+  ],
+  "failures": [],
+  "profiles": [
+    {
+      "path": "examples\\attached_chrome_profile.json",
+      "name": "attached-existing-chrome-authorized-example",
+      "url": "demo/index.html",
+      "authorizedOnly": true,
+      "localDefaultUrl": true,
+      "persistentProfile": false,
+      "userDataDir": "",
+      "extensionPathCount": 0,
+      "manualNavigation": false,
+      "manualWaitMs": 60000,
+      "connectExistingChrome": true,
+      "reuseCurrentPage": true,
+      "cdpEndpoint": "http://127.0.0.1:9222",
+      "localCdpEndpoint": true,
+      "frameChainDepth": 0,
+      "selectorSets": {
+        "slider": 0,
+        "knob": 0,
+        "success": 0
+      },
+      "storesCookieValues": false
+    },
+    {
+      "path": "examples\\authorized_deep_page_profile.json",
+      "name": "local-authorized-deep-page-example",
+      "url": "demo/index.html",
+      "authorizedOnly": true,
+      "localDefaultUrl": true,
+      "persistentProfile": true,
+      "userDataDir": ".liuhen/profiles/local-demo",
+      "extensionPathCount": 0,
+      "manualNavigation": false,
+      "manualWaitMs": 60000,
+      "connectExistingChrome": false,
+      "reuseCurrentPage": false,
+      "cdpEndpoint": "",
+      "localCdpEndpoint": true,
+      "frameChainDepth": 0,
+      "selectorSets": {
+        "slider": 1,
+        "knob": 1,
+        "success": 1
+      },
+      "storesCookieValues": false
+    }
+  ],
+  "reference_patterns": [
+    "Treat browser automation targets as an explicit allowlist",
+    "Keep default CDP attach endpoints bound to localhost",
+    "Store browser diagnostics evidence without cookie values"
+  ]
+}

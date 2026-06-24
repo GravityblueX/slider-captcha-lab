@@ -467,9 +467,10 @@ python scripts/target_surface_registry.py
 python scripts/evidence_manifest.py
 python scripts/safety_contract.py
 python scripts/dependency_inventory.py
+python scripts/authorized_boundary_audit.py
 ```
 
-它会对默认本地授权 demo 生成 `docs/authorized-evidence-pack-local-demo.json`、`docs/authorized-evidence-pack-local-demo.md`、`docs/target-surface-registry.md/json`、`docs/evidence-manifest.md/json`、`docs/safety-contract.md/json` 和 `docs/dependency-inventory.md/json`，记录 profile 边界、浏览器表面、frame 摘要、候选 selector、CDP 诊断摘要、安全边界合同和依赖账本。该证据包只用于复核本地/自有/明确授权页面的诊断链路，不包含验证码求解、第三方绕过或 Cookie 值。
+它会对默认本地授权 demo 生成 `docs/authorized-evidence-pack-local-demo.json`、`docs/authorized-evidence-pack-local-demo.md`、`docs/target-surface-registry.md/json`、`docs/evidence-manifest.md/json`、`docs/safety-contract.md/json`、`docs/dependency-inventory.md/json` 和 `docs/authorized-boundary-audit.md/json`，记录 profile 边界、浏览器表面、frame 摘要、候选 selector、CDP 诊断摘要、安全边界合同、依赖账本和默认目标授权审计。该证据包只用于复核本地/自有/明确授权页面的诊断链路，不包含验证码求解、第三方绕过或 Cookie 值。
 
 ---
 
