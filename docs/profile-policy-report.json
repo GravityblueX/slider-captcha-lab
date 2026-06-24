@@ -1,0 +1,27 @@
+{
+  "report_type": "profile_policy_report",
+  "ok": true,
+  "checked": [
+    {
+      "path": "examples\\attached_chrome_profile.json",
+      "name": "attached-existing-chrome-authorized-example",
+      "url": "demo/index.html",
+      "authorized_only": true,
+      "issues": []
+    },
+    {
+      "path": "examples\\authorized_deep_page_profile.json",
+      "name": "local-authorized-deep-page-example",
+      "url": "demo/index.html",
+      "authorized_only": true,
+      "issues": []
+    }
+  ],
+  "issues": [],
+  "policy": {
+    "scope": "local_owned_or_explicitly_authorized_pages_only",
+    "no_third_party_default_urls": true,
+    "no_cookie_values_in_profiles": true,
+    "local_cdp_only": true
+  }
+}

@@ -5,6 +5,7 @@ import unittest
 from pathlib import Path
 
 from scripts.evidence_pack import build_evidence_pack, render_markdown
+from scripts.profile_policy import build_report, check_profile
 from src.analyzer import analyze
 from src.trajectory import generate_trajectory
 
@@ -66,6 +67,22 @@ class LocalContractTests(unittest.TestCase):
         self.assertTrue(pack["safety"]["does_not_solve_captcha"])
         self.assertIn("Does not solve CAPTCHA", markdown)
         self.assertIn("#knob", markdown)
+
+    def test_profile_policy_accepts_bundled_authorized_examples(self) -> None:
+        report = build_report([ROOT / "examples"])
+
+        self.assertTrue(report["ok"])
+        self.assertEqual(report["issues"], [])
+
+    def test_profile_policy_rejects_third_party_defaults(self) -> None:
+        issues = check_profile(
+            ROOT / "examples" / "bad.json",
+            {"name": "bad", "url": "https://example.com", "authorized_only": False},
+        )
+
+        messages = [issue.message for issue in issues]
+        self.assertIn("authorized_only must be true", messages)
+        self.assertTrue(any("default url must be local" in message for message in messages))
 
 
 if __name__ == "__main__":
