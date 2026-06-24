@@ -1,0 +1,134 @@
+{
+  "report_type": "target_surface_registry",
+  "generated_at": "2026-06-24T03:13:27.842051+00:00",
+  "scope": "local_owned_or_explicitly_authorized_pages_only",
+  "ok": true,
+  "summary": {
+    "profileCount": 2,
+    "persistentProfileCount": 1,
+    "cdpAttachProfileCount": 1,
+    "extensionConfiguredProfileCount": 0,
+    "manualNavigationProfileCount": 0
+  },
+  "gates": [
+    {
+      "name": "profiles discovered",
+      "ok": true,
+      "detail": "2 profile(s)"
+    },
+    {
+      "name": "all profiles authorized",
+      "ok": true,
+      "detail": "authorized_only=true"
+    },
+    {
+      "name": "all default urls local",
+      "ok": true,
+      "detail": "demo/file/localhost defaults only"
+    },
+    {
+      "name": "all CDP endpoints local",
+      "ok": true,
+      "detail": "localhost CDP only"
+    },
+    {
+      "name": "no profile cookie values",
+      "ok": true,
+      "detail": "no stored cookie values"
+    },
+    {
+      "name": "persistent profile surface documented",
+      "ok": true,
+      "detail": "1 profile(s)"
+    },
+    {
+      "name": "CDP attach surface documented",
+      "ok": true,
+      "detail": "1 profile(s)"
+    },
+    {
+      "name": "local demo target present",
+      "ok": true,
+      "detail": "2 local profile(s)"
+    },
+    {
+      "name": "deep page map exists",
+      "ok": true,
+      "detail": "docs/deep-page-map.md"
+    },
+    {
+      "name": "local trace screenshot exists",
+      "ok": true,
+      "detail": "docs/trace-artifacts/local-demo.png"
+    },
+    {
+      "name": "profile policy report ok",
+      "ok": true,
+      "detail": "True"
+    },
+    {
+      "name": "evidence manifest ok",
+      "ok": true,
+      "detail": "True"
+    },
+    {
+      "name": "anti-abuse boundary documented",
+      "ok": true,
+      "detail": "README.md + DISCLAIMER.md"
+    }
+  ],
+  "failures": [],
+  "profiles": [
+    {
+      "path": "examples\\attached_chrome_profile.json",
+      "name": "attached-existing-chrome-authorized-example",
+      "url": "demo/index.html",
+      "authorizedOnly": true,
+      "localDefaultUrl": true,
+      "persistentProfile": false,
+      "userDataDir": "",
+      "extensionPathCount": 0,
+      "manualNavigation": false,
+      "manualWaitMs": 60000,
+      "connectExistingChrome": true,
+      "reuseCurrentPage": true,
+      "cdpEndpoint": "http://127.0.0.1:9222",
+      "localCdpEndpoint": true,
+      "frameChainDepth": 0,
+      "selectorSets": {
+        "slider": 0,
+        "knob": 0,
+        "success": 0
+      },
+      "storesCookieValues": false
+    },
+    {
+      "path": "examples\\authorized_deep_page_profile.json",
+      "name": "local-authorized-deep-page-example",
+      "url": "demo/index.html",
+      "authorizedOnly": true,
+      "localDefaultUrl": true,
+      "persistentProfile": true,
+      "userDataDir": ".liuhen/profiles/local-demo",
+      "extensionPathCount": 0,
+      "manualNavigation": false,
+      "manualWaitMs": 60000,
+      "connectExistingChrome": false,
+      "reuseCurrentPage": false,
+      "cdpEndpoint": "",
+      "localCdpEndpoint": true,
+      "frameChainDepth": 0,
+      "selectorSets": {
+        "slider": 1,
+        "knob": 1,
+        "success": 1
+      },
+      "storesCookieValues": false
+    }
+  ],
+  "reference_patterns": [
+    "Chrome DevTools Protocol diagnostics should stay bound to localhost or explicitly authorized sessions",
+    "Deep page and iframe mapping should be recorded as evidence before automated interaction",
+    "Profile files should describe browser surfaces without storing cookie values"
+  ]
+}

@@ -7,6 +7,7 @@ from pathlib import Path
 from scripts.evidence_pack import build_evidence_pack, render_markdown
 from scripts.evidence_manifest import build_manifest
 from scripts.profile_policy import build_report, check_profile
+from scripts.target_surface_registry import build_registry
 from src.analyzer import analyze
 from src.trajectory import generate_trajectory
 
@@ -74,6 +75,16 @@ class LocalContractTests(unittest.TestCase):
 
         self.assertTrue(report["ok"])
         self.assertEqual(report["issues"], [])
+
+    def test_target_surface_registry_stays_local_and_authorized(self) -> None:
+        registry = build_registry([ROOT / "examples"])
+
+        self.assertTrue(registry["ok"])
+        self.assertEqual(registry["scope"], "local_owned_or_explicitly_authorized_pages_only")
+        self.assertGreaterEqual(registry["summary"]["profileCount"], 2)
+        self.assertGreaterEqual(registry["summary"]["cdpAttachProfileCount"], 1)
+        self.assertTrue(all(profile["authorizedOnly"] for profile in registry["profiles"]))
+        self.assertTrue(all(profile["localDefaultUrl"] for profile in registry["profiles"]))
 
     def test_profile_policy_rejects_third_party_defaults(self) -> None:
         issues = check_profile(

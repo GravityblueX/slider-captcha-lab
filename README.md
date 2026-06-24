@@ -354,6 +354,14 @@ python liuhen.py
 
 - 这些能力仅用于本地、自有或明确授权测试，不用于绕过第三方网站验证码、风控、反爬虫或访问控制。
 
+可以用目标表面注册表复核 Profile、扩展、CDP attach、frame chain 和 selector 配置是否仍处于授权边界内：
+
+```bash
+python scripts/target_surface_registry.py
+```
+
+它会生成 `docs/target-surface-registry.md` 和 `docs/target-surface-registry.json`。
+
 ---
 
 ## 页面结构探测
@@ -455,9 +463,11 @@ python scripts/cdp_attach_smoke.py
 
 ```bash
 python scripts/evidence_pack.py
+python scripts/target_surface_registry.py
+python scripts/evidence_manifest.py
 ```
 
-它会对默认本地授权 demo 生成 `docs/authorized-evidence-pack-local-demo.json` 和 `docs/authorized-evidence-pack-local-demo.md`，记录 profile 边界、frame 摘要、候选 selector 和 CDP 诊断摘要。该证据包只用于复核本地/自有/明确授权页面的诊断链路，不包含验证码求解、第三方绕过或 Cookie 值。
+它会对默认本地授权 demo 生成 `docs/authorized-evidence-pack-local-demo.json`、`docs/authorized-evidence-pack-local-demo.md`、`docs/target-surface-registry.md/json` 和 `docs/evidence-manifest.md/json`，记录 profile 边界、浏览器表面、frame 摘要、候选 selector 和 CDP 诊断摘要。该证据包只用于复核本地/自有/明确授权页面的诊断链路，不包含验证码求解、第三方绕过或 Cookie 值。
 
 ---
 

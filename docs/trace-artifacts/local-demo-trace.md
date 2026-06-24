@@ -1,6 +1,6 @@
 # Local Trace Artifacts
 
-Generated: 2026-06-24T02:44:34.524381+00:00
+Generated: 2026-06-24T03:13:14.965107+00:00
 Scope: `local_owned_or_explicitly_authorized_pages_only`
 Status: `OK`
 Profile: `examples\authorized_deep_page_profile.json`

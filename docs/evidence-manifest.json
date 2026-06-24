@@ -1,6 +1,6 @@
 {
   "report_type": "authorized_evidence_manifest",
-  "generated_at": "2026-06-24T02:44:34.818912+00:00",
+  "generated_at": "2026-06-24T03:13:27.993220+00:00",
   "scope": "local_owned_or_explicitly_authorized_pages_only",
   "ok": true,
   "items": [
@@ -107,6 +107,59 @@
           "name": "not empty",
           "ok": true,
           "detail": "493 chars"
+        },
+        {
+          "name": "scope language",
+          "ok": true,
+          "detail": "authorized/local wording found"
+        }
+      ]
+    },
+    {
+      "path": "docs/target-surface-registry.json",
+      "kind": "json",
+      "purpose": "authorized browser target and surface registry",
+      "exists": true,
+      "ok": true,
+      "checks": [
+        {
+          "name": "exists",
+          "ok": true,
+          "detail": "docs/target-surface-registry.json"
+        },
+        {
+          "name": "ok flag",
+          "ok": true,
+          "detail": "True"
+        },
+        {
+          "name": "authorized scope",
+          "ok": true,
+          "detail": "local_owned_or_explicitly_authorized_pages_only"
+        },
+        {
+          "name": "no cookie values",
+          "ok": true,
+          "detail": "no stored cookie values"
+        }
+      ]
+    },
+    {
+      "path": "docs/target-surface-registry.md",
+      "kind": "markdown",
+      "purpose": "human-readable authorized target surface registry",
+      "exists": true,
+      "ok": true,
+      "checks": [
+        {
+          "name": "exists",
+          "ok": true,
+          "detail": "docs/target-surface-registry.md"
+        },
+        {
+          "name": "not empty",
+          "ok": true,
+          "detail": "1694 chars"
         },
         {
           "name": "scope language",

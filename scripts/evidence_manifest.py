@@ -45,6 +45,17 @@ EVIDENCE_ITEMS = [
         "human-readable profile policy report",
     ),
     EvidenceItem(
+        "docs/target-surface-registry.json",
+        "json",
+        "authorized browser target and surface registry",
+        required_ok=True,
+    ),
+    EvidenceItem(
+        "docs/target-surface-registry.md",
+        "markdown",
+        "human-readable authorized target surface registry",
+    ),
+    EvidenceItem(
         "docs/cdp-authorized-diagnostics.md",
         "markdown",
         "authorized Chrome DevTools Protocol diagnostics notes",
