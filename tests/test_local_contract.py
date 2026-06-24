@@ -6,6 +6,7 @@ from pathlib import Path
 
 from scripts.evidence_pack import build_evidence_pack, render_markdown
 from scripts.evidence_manifest import build_manifest
+from scripts.dependency_inventory import build_inventory
 from scripts.profile_policy import build_report, check_profile
 from scripts.safety_contract import build_contract
 from scripts.target_surface_registry import build_registry
@@ -115,6 +116,14 @@ class LocalContractTests(unittest.TestCase):
         gate_names = {item["name"] for item in contract["gates"]}
         self.assertIn("evidence pack does not solve CAPTCHA", gate_names)
         self.assertIn("no cookie values in generated evidence", gate_names)
+
+    def test_dependency_inventory_records_local_python_components(self) -> None:
+        inventory = build_inventory()
+
+        self.assertTrue(inventory["ok"])
+        names = {dependency["name"].lower() for dependency in inventory["dependencies"]}
+        self.assertIn("playwright", names)
+        self.assertGreaterEqual(len(inventory["dependencies"]), 3)
 
 
 if __name__ == "__main__":

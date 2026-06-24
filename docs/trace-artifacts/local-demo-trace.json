@@ -1,6 +1,6 @@
 {
   "report_type": "local_trace_artifacts",
-  "generated_at": "2026-06-24T03:25:28.045867+00:00",
+  "generated_at": "2026-06-24T03:40:23.376909+00:00",
   "scope": "local_owned_or_explicitly_authorized_pages_only",
   "profile": {
     "path": "examples\\authorized_deep_page_profile.json",

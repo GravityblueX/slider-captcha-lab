@@ -1,0 +1,70 @@
+{
+  "report_type": "slider_dependency_inventory",
+  "generated_at": "2026-06-24T03:40:20.864956+00:00",
+  "ok": true,
+  "project": {
+    "name": "slider-captcha-lab",
+    "version": "0.5.0",
+    "requires-python": ">=3.11"
+  },
+  "dependencies": [
+    {
+      "name": "matplotlib",
+      "specifier": ">=3.8.0",
+      "source": "requirements.txt"
+    },
+    {
+      "name": "pandas",
+      "specifier": ">=2.0.0",
+      "source": "requirements.txt"
+    },
+    {
+      "name": "playwright",
+      "specifier": ">=1.44.0",
+      "source": "requirements.txt"
+    },
+    {
+      "name": "pyinstaller",
+      "specifier": ">=6.0.0",
+      "source": "requirements.txt"
+    }
+  ],
+  "gates": [
+    {
+      "name": "requirements.txt exists",
+      "ok": true,
+      "detail": "requirements.txt"
+    },
+    {
+      "name": "pyproject.toml exists",
+      "ok": true,
+      "detail": "pyproject.toml"
+    },
+    {
+      "name": "dependencies discovered",
+      "ok": true,
+      "detail": "4 requirement(s)"
+    },
+    {
+      "name": "Playwright dependency recorded",
+      "ok": true,
+      "detail": "playwright"
+    },
+    {
+      "name": "GUI dependency recorded",
+      "ok": true,
+      "detail": "GUI/reporting runtime"
+    },
+    {
+      "name": "project metadata recorded",
+      "ok": true,
+      "detail": "slider-captcha-lab"
+    }
+  ],
+  "failures": [],
+  "reference_patterns": [
+    "Python dependency inventory from requirements and pyproject metadata",
+    "OWASP SCVS style component visibility before packaging",
+    "Local dependency evidence without installing or probing third-party services"
+  ]
+}
